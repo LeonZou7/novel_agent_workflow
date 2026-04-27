@@ -1,0 +1,34 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #1a1a2e; color: #e0e0e0; }
+#app { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #333; margin-bottom: 20px; }
+header h1 { font-size: 1.5rem; color: #e8b4b8; }
+nav { display: flex; gap: 8px; }
+.nav-btn { background: #16213e; border: 1px solid #333; color: #999; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+.nav-btn.active { background: #e8b4b8; color: #1a1a2e; border-color: #e8b4b8; }
+.nav-btn:hover:not(.active) { border-color: #e8b4b8; color: #e8b4b8; }
+
+.stage-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+.stage-card { background: #16213e; border: 1px solid #333; border-radius: 8px; padding: 16px; }
+.stage-card.completed { border-color: #4ade80; }
+.stage-card.in_progress { border-color: #facc15; }
+.stage-card h3 { font-size: 0.875rem; color: #999; margin-bottom: 8px; }
+.stage-card .status { font-size: 1rem; }
+.stage-card .version { font-size: 0.75rem; color: #666; margin-top: 4px; }
+
+.work-queue { margin-top: 20px; }
+.work-queue h2 { font-size: 1.125rem; margin-bottom: 12px; color: #e8b4b8; }
+.queue-item { background: #16213e; border-left: 3px solid #facc15; padding: 12px; margin-bottom: 8px; border-radius: 0 6px 6px 0; }
+.queue-item .q-id { font-size: 0.75rem; color: #666; }
+.queue-item .q-desc { margin: 4px 0; }
+.queue-item .q-target { font-size: 0.75rem; color: #e8b4b8; }
+
+.panel { background: #16213e; border: 1px solid #333; border-radius: 8px; padding: 20px; }
+.panel h2 { font-size: 1.25rem; color: #e8b4b8; margin-bottom: 16px; }
+.chapter-list { display: flex; flex-direction: column; gap: 8px; }
+.chapter-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #1a1a2e; border-radius: 6px; cursor: pointer; }
+.chapter-item:hover { background: #222; }
+.chapter-content { white-space: pre-wrap; line-height: 1.8; font-size: 1rem; padding: 20px; background: #1a1a2e; border-radius: 6px; margin-top: 16px; max-height: 70vh; overflow-y: auto; }
+
+.loading { text-align: center; padding: 40px; color: #666; }
+.error { color: #f87171; padding: 20px; }
