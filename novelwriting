@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# novelwriting — unified CLI for the novel writing workflow tool
+# Usage: add this directory to PATH, then run from anywhere:
+#   novelwriting init ./my-novel "剑破苍穹"
+#   novelwriting serve
+#   novelwriting list
+#   novelwriting status [project-path]
+
+set -e
+TOOL_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+usage() {
+    echo "Usage: novelwriting {init|serve|list|status} [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  init <path> <title> [type]    Create a new novel project"
+    echo "  serve                         Start the web server"
+    echo "  list                          List all registered projects"
+    echo "  status [project-path]         Show project status"
+    echo ""
+    echo "Type: web_novel (default) | short_story"
+    exit 1
+}
+
+ensure_deps() {
+    if ! python3 -c "import yaml, flask" 2>/dev/null; then
+        echo "Installing dependencies..."
+        pip3 install pyyaml flask
+    fi
+}
+
+case "$1" in
+    init)
+        shift
+        python3 "$TOOL_DIR/scripts/init_project.py" "$@"
+        ;;
+
+    serve)
+        shift
+        ensure_deps
+        echo "Starting server at http://localhost:5000"
+        python3 "$TOOL_DIR/web/server.py" "$@"
+        ;;
+
+    list)
+        python3 -c "
+import sys; sys.path.insert(0, '$TOOL_DIR/scripts')
+from projects import ProjectRegistry
+
+registry = ProjectRegistry()
+projects = registry.list_projects()
+if not projects:
+    print('No projects yet. Create one with: novelwriting init <path> <title>')
+else:
+    for p in projects:
+        t = '短篇' if p.get('type') == 'short_story' else '网文'
+        print(f'  {p[\"title\"]}  [{t}]  →  {p[\"path\"]}')
+"
+        ;;
+
+    status)
+        python3 -c "
+import sys, os, yaml
+sys.path.insert(0, '$TOOL_DIR/scripts')
+from projects import ProjectRegistry
+
+registry = ProjectRegistry()
+path = '${2:-.}'
+path = os.path.abspath(path)
+
+# Try to find project: first by registry match, then by CWD walk
+state = registry.get_state(path)
+if not state:
+    # Walk up from path looking for .novel/
+    cwd = path
+    while cwd != '/':
+        if os.path.isdir(os.path.join(cwd, '.novel')):
+            state = registry.get_state(cwd)
+            path = cwd
+            break
+        cwd = os.path.dirname(cwd)
+
+if not state:
+    print(f'No novel project found at {path}')
+    sys.exit(1)
+
+with open(os.path.join(path, '.novel', 'config.yml'), 'r') as f:
+    config = yaml.safe_load(f)
+
+stages = state.get('stages', {})
+status_icons = {'completed': '✅', 'in_progress': '🔄', 'pending': '⏳', 'dirty': '⚠️'}
+
+print(f'📖 {config[\"project\"][\"title\"]}')
+print(f'   类型: {config[\"project\"][\"type\"]}  |  模板: {config[\"template\"][\"methodology\"]}')
+print(f'   当前阶段: {state.get(\"current_stage\", \"unknown\")}')
+print()
+for name, info in stages.items():
+    icon = status_icons.get(info.get('status', 'pending'), '⏳')
+    ver = info.get('version', 0)
+    extra = ''
+    if name == 'draft':
+        extra = f'  (第 {info.get(\"last_chapter\", 0)} 章)'
+    print(f'  {icon} {name}  v{ver}{extra}')
+"
+        ;;
+
+    *)
+        usage
+        ;;
+esac

@@ -58,7 +58,7 @@ function renderDashboard(data) {
             <div class="how-to-use">
                 <h3>开始使用</h3>
                 <p>暂无小说项目。请在终端运行以下命令创建第一个项目：</p>
-                <p style="margin-top:8px;"><code>python3 scripts/init_project.py ./我的小说 "小说标题"</code></p>
+                <p style="margin-top:8px;"><code>novelwriting init ./我的小说 "小说标题"</code></p>
                 <p style="margin-top:8px;">创建后刷新此页面即可看到项目。</p>
             </div>
         </div>`;
