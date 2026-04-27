@@ -30,5 +30,34 @@ nav { display: flex; gap: 8px; }
 .chapter-item:hover { background: #222; }
 .chapter-content { white-space: pre-wrap; line-height: 1.8; font-size: 1rem; padding: 20px; background: #1a1a2e; border-radius: 6px; margin-top: 16px; max-height: 70vh; overflow-y: auto; }
 
+.nav-btn.cmd-highlight { border-color: #facc15; color: #facc15; }
+.nav-btn.cmd-highlight.active { background: #facc15; color: #1a1a2e; }
+.nav-btn.cmd-highlight:hover:not(.active) { border-color: #facc15; color: #facc15; }
+
+.command-section { margin-bottom: 24px; }
+.command-section h3 { font-size: 1rem; color: #e8b4b8; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.command-section h3 .stage-status { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; }
+.command-section h3 .stage-status.completed { background: #4ade8022; color: #4ade80; }
+.command-section h3 .stage-status.pending { background: #66666622; color: #666; }
+.command-section h3 .stage-status.in_progress { background: #facc1522; color: #facc15; }
+
+.cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
+.cmd-card { background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cmd-card:hover { border-color: #555; }
+.cmd-card .cmd-info { flex: 1; min-width: 0; }
+.cmd-card .cmd-label { font-size: 0.8rem; color: #999; margin-bottom: 4px; }
+.cmd-card .cmd-text { font-family: monospace; font-size: 0.85rem; color: #e0e0e0; word-break: break-all; }
+.cmd-card .cmd-hint { font-size: 0.7rem; color: #666; margin-top: 3px; }
+.cmd-btn { background: #e8b4b8; color: #1a1a2e; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; white-space: nowrap; font-weight: 500; }
+.cmd-btn:hover { background: #f0c8cc; }
+.cmd-btn.copied { background: #4ade80; }
+.arg-input { background: #16213e; border: 1px solid #333; color: #e0e0e0; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; width: 80px; font-family: monospace; }
+.arg-input:focus { outline: none; border-color: #e8b4b8; }
+
+.how-to-use { background: #16213e; border: 1px solid #facc15; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+.how-to-use h3 { color: #facc15; margin-bottom: 8px; }
+.how-to-use p { font-size: 0.85rem; color: #ccc; line-height: 1.6; }
+.how-to-use code { background: #1a1a2e; padding: 1px 5px; border-radius: 3px; color: #facc15; }
+
 .loading { text-align: center; padding: 40px; color: #666; }
 .error { color: #f87171; padding: 20px; }
