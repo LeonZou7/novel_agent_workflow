@@ -1,11 +1,69 @@
 const API = '/api';
+let currentProject = '';
+let projects = [];
 
 async function fetchJSON(url) {
-    const resp = await fetch(url);
+    // Append project param to all API calls except /api/projects
+    const separator = url.includes('?') ? '&' : '?';
+    const fullUrl = (url === `${API}/projects` || !currentProject)
+        ? url
+        : `${url}${separator}project=${encodeURIComponent(currentProject)}`;
+    const resp = await fetch(fullUrl);
     return resp.json();
 }
 
+async function loadProjects() {
+    const data = await fetchJSON(`${API}/projects`);
+    projects = data.projects || [];
+    const sel = document.getElementById('project-selector');
+
+    // Keep current selection if it still exists
+    const currentValue = sel.value;
+
+    sel.innerHTML = '<option value="">-- 选择项目 --</option>';
+    for (const p of projects) {
+        const label = `${p.title} (${p.type === 'short_story' ? '短篇' : '网文'})`;
+        sel.innerHTML += `<option value="${escapeHtml(p.path)}">${escapeHtml(label)}</option>`;
+    }
+
+    // Restore selection or auto-select first
+    if (currentValue && projects.some(p => p.path === currentValue)) {
+        sel.value = currentValue;
+        currentProject = currentValue;
+    } else if (projects.length > 0 && !currentProject) {
+        sel.value = projects[0].path;
+        currentProject = projects[0].path;
+    } else if (projects.length === 0) {
+        currentProject = '';
+    }
+
+    return projects;
+}
+
+function onProjectChange() {
+    const sel = document.getElementById('project-selector');
+    currentProject = sel.value;
+
+    // Refresh current tab
+    const activeTab = document.querySelector('.nav-btn.active');
+    if (activeTab) {
+        loadTab(activeTab.dataset.tab);
+    }
+}
+
 function renderDashboard(data) {
+    if (data.error) {
+        return `<div class="panel">
+            <h2>欢迎使用 Novel Writer</h2>
+            <div class="how-to-use">
+                <h3>开始使用</h3>
+                <p>暂无小说项目。请在终端运行以下命令创建第一个项目：</p>
+                <p style="margin-top:8px;"><code>python3 scripts/init_project.py ./我的小说 "小说标题"</code></p>
+                <p style="margin-top:8px;">创建后刷新此页面即可看到项目。</p>
+            </div>
+        </div>`;
+    }
+
     const stages = data.stages || {};
     const statusLabels = { pending: '⏳ 未开始', in_progress: '🔄 进行中', completed: '✅ 已完成', dirty: '⚠️ 需更新' };
     let html = '<div class="panel"><h2>项目进度</h2><div class="stage-list">';
@@ -311,22 +369,48 @@ document.addEventListener('input', (e) => {
 
 const renderers = {
     dashboard: async () => {
+        // First ensure projects are loaded
+        if (projects.length === 0) {
+            await loadProjects();
+        }
+        if (!currentProject) {
+            document.getElementById('project-title').textContent = '📖 Novel Writer';
+            return renderDashboard({ error: 'no-project' });
+        }
         const data = await fetchJSON(`${API}/status`);
         if (data.error) return '<div class="error">未找到小说项目。请在项目目录下运行。</div>';
         document.getElementById('project-title').textContent = `📖 ${data.project?.title || 'Novel Writer'}`;
         return renderDashboard(data);
     },
     commands: async () => {
+        if (!currentProject) {
+            return '<div class="panel"><h2>请先选择一个项目</h2><p class="loading">在顶部下拉框中选择项目后可用</p></div>';
+        }
         const data = await fetchJSON(`${API}/status`);
-        if (data.error) return '<div class="error">未找到小说项目。请在项目目录下运行。</div>';
+        if (data.error) return '<div class="error">项目无效。请检查项目路径。</div>';
         document.getElementById('project-title').textContent = `📖 ${data.project?.title || 'Novel Writer'}`;
         return await renderCommands();
     },
-    chapters: renderChapters,
-    outline: renderOutline,
-    characters: renderCharacters,
-    world: renderWorld,
-    review: renderReview,
+    chapters: async () => {
+        if (!currentProject) return '<div class="panel"><h2>请先选择一个项目</h2></div>';
+        return await renderChapters();
+    },
+    outline: async () => {
+        if (!currentProject) return '<div class="panel"><h2>请先选择一个项目</h2></div>';
+        return await renderOutline();
+    },
+    characters: async () => {
+        if (!currentProject) return '<div class="panel"><h2>请先选择一个项目</h2></div>';
+        return await renderCharacters();
+    },
+    world: async () => {
+        if (!currentProject) return '<div class="panel"><h2>请先选择一个项目</h2></div>';
+        return await renderWorld();
+    },
+    review: async () => {
+        if (!currentProject) return '<div class="panel"><h2>请先选择一个项目</h2></div>';
+        return await renderReview();
+    },
 };
 
 async function loadTab(tab) {
@@ -346,9 +430,10 @@ async function loadTab(tab) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => loadTab(btn.dataset.tab));
     });
+    await loadProjects();
     loadTab('dashboard');
 });

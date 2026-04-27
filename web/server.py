@@ -4,7 +4,7 @@
 import os
 import sys
 import yaml
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 
 SCRIPT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts")
 sys.path.insert(0, SCRIPT_DIR)
@@ -12,12 +12,22 @@ sys.path.insert(0, SCRIPT_DIR)
 from kg import KnowledgeGraph
 from state import StateManager
 from work_queue import WorkQueue
+from projects import ProjectRegistry
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
 
 def get_project_root():
-    """Find the .novel directory from current working directory."""
+    """Get project root from ?project= query param or CWD fallback."""
+    # Priority 1: explicit ?project= query parameter
+    project = request.args.get("project")
+    if project:
+        project = os.path.abspath(project)
+        if os.path.isdir(os.path.join(project, ".novel")):
+            return project
+        return None
+
+    # Priority 2: walk up from CWD
     cwd = os.getcwd()
     while cwd != "/":
         if os.path.isdir(os.path.join(cwd, ".novel")):
@@ -29,6 +39,27 @@ def get_project_root():
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
+
+
+@app.route("/api/projects")
+def api_projects():
+    registry = ProjectRegistry()
+    projects = registry.list_projects()
+
+    result = []
+    for p in projects:
+        item = dict(p)
+        # Attach stage summaries if project exists on disk
+        state = registry.get_state(p["path"])
+        if state:
+            item["stages"] = state.get("stages", {})
+            item["current_stage"] = state.get("current_stage", "")
+        else:
+            item["stages"] = {}
+            item["current_stage"] = ""
+        result.append(item)
+
+    return jsonify({"projects": result})
 
 
 @app.route("/api/status")

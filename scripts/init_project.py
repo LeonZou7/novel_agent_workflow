@@ -7,6 +7,7 @@ import copy
 import shutil
 import glob
 from datetime import datetime
+from projects import ProjectRegistry
 
 CONFIG_TEMPLATE = {
     "project": {
@@ -125,6 +126,10 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
         os.makedirs(skills_dst, exist_ok=True)
         for src_file in glob.glob(os.path.join(skills_src, "novel-*.md")):
             shutil.copy2(src_file, skills_dst)
+
+    # Register in global project list
+    registry = ProjectRegistry()
+    registry.register(project_path, title, novel_type)
 
     return {"status": "ok", "path": project_path, "title": title}
 

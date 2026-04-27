@@ -12,6 +12,7 @@ from init_project import init_project
 from kg import KnowledgeGraph
 from state import StateManager
 from work_queue import WorkQueue
+from projects import ProjectRegistry
 
 
 class TestE2E(unittest.TestCase):
@@ -120,9 +121,56 @@ class TestE2E(unittest.TestCase):
         updated = kg.read_foreshadowing()
         self.assertEqual(len(updated["planted"]), 1)
 
+    def test_08_project_registry(self):
+        """Test global project registry operations."""
+        registry = ProjectRegistry()
+
+        # init_project already registered self.tmpdir
+        projects = registry.list_projects()
+        self.assertTrue(any(p["path"] == os.path.abspath(self.tmpdir) for p in projects),
+                        "Project should be registered after init")
+
+        # Test touch
+        registry.touch(self.tmpdir)
+        p = registry.find_by_path(self.tmpdir)
+        self.assertIsNotNone(p)
+        self.assertIsNotNone(p["last_opened"])
+
+        # Test state retrieval
+        state = registry.get_state(self.tmpdir)
+        self.assertIsNotNone(state)
+        self.assertIn("stages", state)
+
+    def test_09_multi_project(self):
+        """Test registering multiple projects."""
+        registry = ProjectRegistry()
+        old_count = len(registry.list_projects())
+
+        # Create a second temp project
+        d2 = tempfile.mkdtemp()
+        self.addCleanup(lambda: self._cleanup_project(d2))
+        init_project(d2, "第二本小说", "short_story")
+
+        projects = registry.list_projects()
+        self.assertEqual(len(projects), old_count + 1)
+
+        # Clean up registry
+        registry.unregister(d2)
+        projects_after = registry.list_projects()
+        self.assertEqual(len(projects_after), old_count)
+
+    def _cleanup_project(self, path):
+        import shutil
+        registry = ProjectRegistry()
+        registry.unregister(path)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+
     @classmethod
     def tearDownClass(cls):
         import shutil
+        registry = ProjectRegistry()
+        registry.unregister(cls.tmpdir)
         shutil.rmtree(cls.tmpdir)
 
 
