@@ -13,6 +13,7 @@ from kg import KnowledgeGraph
 from state import StateManager
 from work_queue import WorkQueue
 from projects import ProjectRegistry
+from init_project import init_project
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
@@ -60,6 +61,33 @@ def api_projects():
         result.append(item)
 
     return jsonify({"projects": result})
+
+
+@app.route("/api/projects", methods=["POST"])
+def api_create_project():
+    data = request.get_json()
+    if not data or "title" not in data or "path" not in data:
+        return jsonify({"error": "title and path are required"}), 400
+
+    title = data["title"].strip()
+    path = data["path"].strip()
+    novel_type = data.get("type", "web_novel")
+
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+
+    # Expand ~ and resolve to absolute path
+    path = os.path.expanduser(path)
+    path = os.path.abspath(path)
+
+    if os.path.exists(os.path.join(path, ".novel")):
+        return jsonify({"error": "Project already exists at this path"}), 409
+
+    result = init_project(path, title, novel_type)
+    if result["status"] == "error":
+        return jsonify(result), 400
+
+    return jsonify(result), 201
 
 
 @app.route("/api/status")

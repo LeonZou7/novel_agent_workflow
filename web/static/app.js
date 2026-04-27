@@ -51,22 +51,124 @@ function onProjectChange() {
     }
 }
 
+// ─── Create Project ──────────────────────────────────────────────────
+
+function showCreateModal() {
+    document.getElementById('create-modal').style.display = 'flex';
+    document.getElementById('create-title').focus();
+    document.getElementById('create-error').style.display = 'none';
+
+    // Set default path
+    const pathInput = document.getElementById('create-path');
+    if (!pathInput.value) {
+        pathInput.value = '~/Documents/drafts/';
+    }
+
+    // Show/hide folder picker based on browser support
+    const pickBtn = document.getElementById('pick-folder-btn');
+    if (typeof window.showDirectoryPicker === 'function') {
+        pickBtn.style.display = '';
+    } else {
+        pickBtn.style.display = 'none';
+    }
+}
+
+function closeCreateModal() {
+    document.getElementById('create-modal').style.display = 'none';
+    document.getElementById('create-title').value = '';
+    document.getElementById('create-error').style.display = 'none';
+}
+
+async function pickFolder() {
+    try {
+        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        document.getElementById('create-path').value = dirHandle.name;
+    } catch (e) {
+        // User cancelled or API not available - ignore
+    }
+}
+
+async function submitCreateProject() {
+    const title = document.getElementById('create-title').value.trim();
+    const path = document.getElementById('create-path').value.trim();
+    const type = document.getElementById('create-type').value;
+    const errorEl = document.getElementById('create-error');
+    const btn = document.getElementById('create-submit-btn');
+
+    if (!title || !path) {
+        errorEl.textContent = '请填写标题和路径';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    btn.textContent = '创建中...';
+    btn.disabled = true;
+    errorEl.style.display = 'none';
+
+    try {
+        const resp = await fetch(`${API}/projects`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, path, type }),
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            errorEl.textContent = data.error || '创建失败';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        closeCreateModal();
+        await loadProjects();
+
+        // Select the newly created project
+        const sel = document.getElementById('project-selector');
+        sel.value = data.path;
+        currentProject = data.path;
+        loadTab('dashboard');
+    } catch (e) {
+        errorEl.textContent = '网络错误: ' + e.message;
+        errorEl.style.display = 'block';
+    } finally {
+        btn.textContent = '创建项目';
+        btn.disabled = false;
+    }
+}
+
+// Close modal on overlay click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'create-modal') {
+        closeCreateModal();
+    }
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeCreateModal();
+    }
+});
+
 function renderDashboard(data) {
     if (data.error) {
         return `<div class="panel">
             <h2>欢迎使用 Novel Writer</h2>
             <div class="how-to-use">
                 <h3>开始使用</h3>
-                <p>暂无小说项目。请在终端运行以下命令创建第一个项目：</p>
-                <p style="margin-top:8px;"><code>novelwriting init ./我的小说 "小说标题"</code></p>
-                <p style="margin-top:8px;">创建后刷新此页面即可看到项目。</p>
+                <p>还没有小说项目。你可以：</p>
+                <p style="margin-top:12px;">
+                    <button class="create-project-btn" onclick="showCreateModal()">+ 新建项目</button>
+                </p>
+                <p style="margin-top:12px;color:#666;">或在终端运行：<code>novelwriting init ./我的小说 "小说标题"</code></p>
             </div>
         </div>`;
     }
 
     const stages = data.stages || {};
     const statusLabels = { pending: '⏳ 未开始', in_progress: '🔄 进行中', completed: '✅ 已完成', dirty: '⚠️ 需更新' };
-    let html = '<div class="panel"><h2>项目进度</h2><div class="stage-list">';
+    let html = '<div class="dashboard-toolbar"><button class="create-project-btn" onclick="showCreateModal()">+ 新建项目</button></div>';
+    html += '<div class="panel"><h2>项目进度</h2><div class="stage-list">';
     for (const [name, info] of Object.entries(stages)) {
         const cls = info.status === 'completed' ? 'completed' : info.status === 'in_progress' ? 'in_progress' : '';
         html += `<div class="stage-card ${cls}">

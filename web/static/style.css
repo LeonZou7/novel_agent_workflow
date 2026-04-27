@@ -63,5 +63,21 @@ nav { display: flex; gap: 8px; flex-wrap: wrap; }
 .how-to-use p { font-size: 0.85rem; color: #ccc; line-height: 1.6; }
 .how-to-use code { background: #1a1a2e; padding: 1px 5px; border-radius: 3px; color: #facc15; }
 
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: #16213e; border: 1px solid #333; border-radius: 12px; padding: 24px; width: 480px; max-width: 90vw; }
+.modal-box h2 { font-size: 1.25rem; color: #e8b4b8; margin-bottom: 20px; }
+.modal-body { display: flex; flex-direction: column; gap: 12px; }
+.modal-body label { font-size: 0.8rem; color: #999; }
+.modal-input { background: #1a1a2e; border: 1px solid #333; color: #e0e0e0; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; width: 100%; }
+.modal-input:focus { outline: none; border-color: #e8b4b8; }
+.path-row { display: flex; gap: 8px; }
+.path-row .modal-input { flex: 1; }
+.pick-folder-btn { flex-shrink: 0; }
+.modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+.create-project-btn { background: #e8b4b8; color: #1a1a2e; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; }
+.create-project-btn:hover { background: #f0c8cc; }
+.dashboard-toolbar { margin-bottom: 16px; }
+
 .loading { text-align: center; padding: 40px; color: #666; }
 .error { color: #f87171; padding: 20px; }
