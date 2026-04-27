@@ -1,0 +1,22 @@
+name: short_story_basic
+label: "短篇小说基础模板"
+description: "适用于 5000-30000 字的短篇小说结构。"
+
+structure:
+  word_count_range: "5000-30000"
+  chapters: "1-10"
+  beats:
+    - name: "开场即冲突"
+      description: "第一段就抛出冲突或悬念，快速抓住读者"
+    - name: "人物速写"
+      description: "用 1-2 个细节勾勒人物核心特征"
+    - name: "情节推进"
+      description: "紧凑推进，每个场景推动情节或有新发现"
+    - name: "高潮反转"
+      description: "短篇核心反转或情感爆发点"
+    - name: "余韵收尾"
+      description: "简短有力的结尾，留白或点题"
+
+rhythm:
+  chapter_target_words: 3000
+  total_chapters_target: 3

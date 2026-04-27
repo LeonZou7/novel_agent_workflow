@@ -1,0 +1,48 @@
+name: three_act
+label: "经典三幕式结构"
+description: >
+  适用于各类小说的经典三幕式结构。
+
+structure:
+  act_one:
+    label: "第一幕：建置"
+    proportion: "25%"
+    beats:
+      - name: "开场画面"
+        description: "展示主角的日常世界"
+      - name: "主题呈现"
+        description: "暗示故事的核心主题"
+      - name: "催化剂"
+        description: "打破日常的事件，推动主角行动"
+      - name: "第一幕转折点"
+        description: "主角做出不可逆的选择，进入新世界"
+
+  act_two:
+    label: "第二幕：对抗"
+    proportion: "50%"
+    beats:
+      - name: "B故事开始"
+        description: "副线（通常是感情线）展开"
+      - name: "娱乐游戏"
+        description: "主角在新世界探索/成长/取得小胜利"
+      - name: "中点"
+        description: "假胜利或假失败，赌注升级"
+      - name: "反派逼近"
+        description: "反派力量增强，主角压力增大"
+      - name: "一无所有"
+        description: "主角遭遇最大打击，失去一切"
+      - name: "灵魂黑夜"
+        description: "主角最低谷，面对内心最深的恐惧"
+
+  act_three:
+    label: "第三幕：解决"
+    proportion: "25%"
+    beats:
+      - name: "突破"
+        description: "主角找到新的力量/领悟/方案"
+      - name: "高潮"
+        description: "与最终反派的决战"
+      - name: "结局"
+        description: "展示新平衡，角色成长的结果"
+      - name: "终场画面"
+        description: "与开场画面呼应的最终镜头"

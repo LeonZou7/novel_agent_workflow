@@ -1,0 +1,51 @@
+name: save_the_cat
+label: "Save the Cat! 节拍表"
+description: "Blake Snyder 的剧本节拍表，适用于快节奏商业小说。"
+
+structure:
+  beats:
+    - name: "开场画面"
+      pages: 1
+      description: "故事开始前的世界状态"
+    - name: "主题陈述"
+      pages: 5
+      description: "角色说出/暗示故事的主题"
+    - name: "设定"
+      pages: "1-10"
+      description: "展示主角的优缺点、人际关系和日常"
+    - name: "催化剂"
+      pages: 12
+      description: "爆炸性事件，故事真正开始"
+    - name: "辩论"
+      pages: "12-25"
+      description: "主角犹豫/质疑是否要踏上旅程"
+    - name: "第二幕开启"
+      pages: 25
+      description: "主角做出主动选择，进入新世界"
+    - name: "B故事"
+      pages: 30
+      description: "副线开始，通常是爱情/友情线"
+    - name: "娱乐游戏"
+      pages: "30-55"
+      description: "故事的'预告片'部分，最有看点的场景"
+    - name: "中点"
+      pages: 55
+      description: "虚假的胜利或失败，赌注全面升级"
+    - name: "反派逼近"
+      pages: "55-75"
+      description: "反派势力增强，主角遭受挫折"
+    - name: "一无所有"
+      pages: 75
+      description: "主角跌入谷底，失去最重要的东西"
+    - name: "灵魂黑夜"
+      pages: "75-85"
+      description: "主角面对内心的黑暗，领悟真正的问题"
+    - name: "第三幕开启"
+      pages: 85
+      description: "主角找到解决方案，重新振作"
+    - name: "高潮"
+      pages: "85-100"
+      description: "最终决战"
+    - name: "终场画面"
+      pages: 100
+      description: "新的平衡达成，展示变化"
