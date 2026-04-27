@@ -100,25 +100,25 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
         yaml.dump(state, f, allow_unicode=True, default_flow_style=False)
 
     with open(os.path.join(novel_root, "work_queue.yml"), "w") as f:
-        yaml.dump({"tasks": []}, f, allow_unicode=True)
+        yaml.dump({"tasks": []}, f, allow_unicode=True, default_flow_style=False)
 
     with open(os.path.join(knowledge_root, "foreshadowing.yml"), "w") as f:
-        yaml.dump({"planted": [], "progressed": [], "resolved": []}, f, allow_unicode=True)
+        yaml.dump({"planted": [], "progressed": [], "resolved": []}, f, allow_unicode=True, default_flow_style=False)
 
     with open(os.path.join(knowledge_root, "timeline.yml"), "w") as f:
-        yaml.dump({"events": []}, f, allow_unicode=True)
+        yaml.dump({"events": []}, f, allow_unicode=True, default_flow_style=False)
 
     return {"status": "ok", "path": project_path, "title": title}
 
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print("Usage: python init_project.py <project_path> <title> [type]")
         sys.exit(1)
 
     path = sys.argv[1]
-    title = sys.argv[2] if len(sys.argv) > 2 else "未命名"
+    title = sys.argv[2]
     ntype = sys.argv[3] if len(sys.argv) > 3 else "web_novel"
 
     result = init_project(path, title, ntype)
