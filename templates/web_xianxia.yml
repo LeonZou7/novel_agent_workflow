@@ -1,0 +1,84 @@
+name: web_xianxia
+label: "网络小说 - 修仙"
+description: >
+  修仙题材专用模板，涵盖境界体系、秘境探索、宗门斗争等核心要素。
+
+structure:
+  acts:
+    - name: "炼气·凡尘起始"
+      chapters: "1-50"
+      beats:
+        - name: "凡人之躯"
+          description: "主角起点，展现与修仙世界的差距"
+        - name: "机缘入门"
+          description: "获得修仙功法或拜入师门"
+        - name: "炼气筑基"
+          description: "第一个大境界突破"
+        - name: "宗门小比"
+          description: "宗门内第一次展现实力"
+    - name: "金丹·纵横一方"
+      chapters: "51-150"
+      beats:
+        - name: "秘境机缘"
+          description: "进入秘境，获得稀有资源/传承"
+        - name: "越级战斗"
+          description: "以低境界战高境界，展示战力非凡"
+        - name: "势力纷争"
+          description: "卷入宗门/家族/皇朝势力斗争"
+        - name: "金丹成"
+          description: "金丹大境界突破，实力飞跃"
+    - name: "元婴·天下纵横"
+      chapters: "151-300"
+      beats:
+        - name: "上界来客"
+          description: "了解上界/更高层次的存在"
+        - name: "道统之争"
+          description: "卷入大道统之间的理念/资源之争"
+        - name: "元婴劫"
+          description: "渡劫突破元婴"
+    - name: "化神·超脱之路"
+      chapters: "301-500"
+      beats:
+        - name: "天地大劫"
+          description: "天地量劫降临，所有修士卷入"
+        - name: "道之终极"
+          description: "领悟最终大道"
+        - name: "超脱飞升"
+          description: "飞升上界/成就至高"
+
+realms:
+  - name: "炼气期"
+    sub_stages: 9
+    lifespan: "150岁"
+  - name: "筑基期"
+    sub_stages: 9
+    lifespan: "300岁"
+  - name: "金丹期"
+    sub_stages: 9
+    lifespan: "600岁"
+  - name: "元婴期"
+    sub_stages: 9
+    lifespan: "1500岁"
+  - name: "化神期"
+    sub_stages: 9
+    lifespan: "3000岁"
+  - name: "炼虚期"
+    sub_stages: 9
+    lifespan: "万年"
+  - name: "合体期"
+    sub_stages: 9
+    lifespan: "数万年"
+  - name: "大乘期"
+    sub_stages: 9
+    lifespan: "十万年"
+  - name: "渡劫期"
+    sub_stages: 9
+    lifespan: "无上限"
+
+world_elements:
+  - "灵石/灵脉"
+  - "炼丹/炼器/阵法/符箓"
+  - "宗门/家族/散修"
+  - "秘境/洞府/遗迹"
+  - "天劫/心魔"
+  - "道侣/师徒/恩怨"

@@ -1,0 +1,59 @@
+name: web_trope
+label: "网络小说 - 金手指/升级流"
+description: >
+  适用于主角获得金手指后一路升级、打脸反派的爽文结构。
+  核心节奏：压力-升级-打脸-收获 循环。
+
+structure:
+  acts:
+    - name: "开篇·金手指获取"
+      chapters: "1-30"
+      beats:
+        - name: "主角初始困境"
+          description: "展示主角低起点，建立读者共情"
+        - name: "金手指降临"
+          description: "主角意外获得特殊能力/宝物/传承"
+        - name: "初次验证"
+          description: "小范围验证金手指效果，获得第一桶金/第一次升级"
+        - name: "第一个小反派"
+          description: "遭遇看不起主角的反派，首次打脸"
+    - name: "发展·实力攀升"
+      chapters: "31-100"
+      beats:
+        - name: "进入更大舞台"
+          description: "离开新手村，进入更广阔的世界（宗门/学院/城市）"
+        - name: "遇强则强"
+          description: "遭遇更强的对手，金手指持续发挥作用"
+        - name: "势力初建"
+          description: "主角开始建立自己的势力/人脉"
+        - name: "关键转折"
+          description: "发现更大的威胁/阴谋，目标升级"
+    - name: "高潮·巅峰对决"
+      chapters: "101-200"
+      beats:
+        - name: "最终反派揭示"
+          description: "揭露最终BOSS的身份和动机"
+        - name: "至暗时刻"
+          description: "主角遭遇重大挫折/失去重要之物"
+        - name: "最终突破"
+          description: "金手指/能力达到圆满，获得最终力量"
+        - name: "终极对决"
+          description: "与最终反派的决战"
+    - name: "结局·新的开始"
+      chapters: "201-尾声"
+      beats:
+        - name: "战后余波"
+          description: "处理战后事务，交代角色去向"
+        - name: "新世界展开"
+          description: "为可能的续作留白"
+
+rhythm:
+  cycle: "升级-打脸-收获"
+  climax_interval_chapters: 10
+  chapter_structure:
+    - name: "开头钩子"
+      description: "前300字设置悬念或冲突"
+    - name: "主体推进"
+      description: "情节推进 + 1-2个小冲突"
+    - name: "结尾爆点"
+      description: "最后500字设置爽点或悬念，保证追读"

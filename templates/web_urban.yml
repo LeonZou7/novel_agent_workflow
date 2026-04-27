@@ -1,0 +1,42 @@
+name: web_urban
+label: "网络小说 - 都市"
+description: >
+  都市题材模板，适用于神医/兵王/神豪/重生等都市爽文变体。
+
+structure:
+  acts:
+    - name: "归来·身份揭晓"
+      chapters: "1-30"
+      beats:
+        - name: "低调开场"
+          description: "主角以普通人身份出现在都市环境"
+        - name: "身份初显"
+          description: "第一次展示真实身份/能力，震慑小角色"
+        - name: "关系建立"
+          description: "与女主/兄弟/对手建立初识关系"
+        - name: "第一次大场面"
+          description: "在公开场合打脸主要反派"
+    - name: "崛起·势力扩张"
+      chapters: "31-150"
+      beats:
+        - name: "商业/权力版图"
+          description: "主角建立商业帝国或权力网络"
+        - name: "层层打脸"
+          description: "逐级打脸越来越强的对手"
+        - name: "暗线浮现"
+          description: "揭示主角过往的秘密或更大的阴谋"
+    - name: "巅峰·终极对决"
+      chapters: "151-300"
+      beats:
+        - name: "最终敌人"
+          description: "面对最终BOSS（国际势力/隐藏家族等）"
+        - name: "全面战争"
+          description: "多线同时开战，主角底牌尽出"
+        - name: "尘埃落定"
+          description: "击败最终敌人，建立新秩序"
+
+elements:
+  - "兵王/神医/神豪/重生/异能"
+  - "美女总裁/校花/警花"
+  - "打脸/装逼/反转"
+  - "商业/权力/地下世界"

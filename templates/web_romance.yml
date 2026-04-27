@@ -1,0 +1,49 @@
+name: web_romance
+label: "网络小说 - 言情"
+description: >
+  言情题材模板，适用于古代/现代言情，含甜宠、虐恋、追妻火葬场等子类型。
+
+structure:
+  acts:
+    - name: "相遇·命运交织"
+      chapters: "1-30"
+      beats:
+        - name: "初次相遇"
+          description: "男女主初次相遇，埋下羁绊种子"
+        - name: "冲突/误解"
+          description: "产生误解或冲突，制造张力"
+        - name: "命运关联"
+          description: "因外部事件被迫产生更多交集"
+    - name: "纠缠·情感升温"
+      chapters: "31-100"
+      beats:
+        - name: "暧昧萌芽"
+          description: "双方开始察觉自己的感情"
+        - name: "阻碍降临"
+          description: "第三方介入/家庭反对/误会加深"
+        - name: "分离/虐点"
+          description: "因某种原因被迫分离"
+    - name: "重逢·真爱确认"
+      chapters: "101-150"
+      beats:
+        - name: "命运重逢"
+          description: "分开后再次相遇"
+        - name: "误会解除"
+          description: "关键误解被澄清"
+        - name: "感情确认"
+          description: "正式确定关系"
+    - name: "圆满·携手未来"
+      chapters: "151-200"
+      beats:
+        - name: "共同面对"
+          description: "一起解决最后的障碍"
+        - name: "圆满结局"
+          description: "HE / 番外"
+
+sub_types:
+  - "甜宠"
+  - "虐恋"
+  - "追妻火葬场"
+  - "先婚后爱"
+  - "重生复仇"
+  - "穿越"
