@@ -4,6 +4,8 @@
 import os
 import yaml
 import copy
+import shutil
+import glob
 from datetime import datetime
 
 CONFIG_TEMPLATE = {
@@ -68,6 +70,9 @@ OUTPUT_DIRS = ["outline", "world", "characters", "chapters", "review"]
 
 NOVEL_DIR = ".novel"
 
+# Resolve the package root (parent of scripts/), used to locate bundled skills and templates
+PACKAGE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def init_project(project_path: str, title: str, novel_type: str = "web_novel") -> dict:
     """Initialize a novel project directory with all required files."""
@@ -112,6 +117,14 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
 
     with open(os.path.join(knowledge_root, "timeline.yml"), "w") as f:
         yaml.dump({"events": []}, f, allow_unicode=True, default_flow_style=False)
+
+    # Copy bundled skills into the project so /novel-* commands work out of the box
+    skills_src = os.path.join(PACKAGE_DIR, ".claude", "skills")
+    skills_dst = os.path.join(project_path, ".claude", "skills")
+    if os.path.isdir(skills_src):
+        os.makedirs(skills_dst, exist_ok=True)
+        for src_file in glob.glob(os.path.join(skills_src, "novel-*.md")):
+            shutil.copy2(src_file, skills_dst)
 
     return {"status": "ok", "path": project_path, "title": title}
 
