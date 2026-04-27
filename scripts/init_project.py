@@ -3,6 +3,7 @@
 
 import os
 import yaml
+import copy
 from datetime import datetime
 
 CONFIG_TEMPLATE = {
@@ -71,6 +72,10 @@ NOVEL_DIR = ".novel"
 def init_project(project_path: str, title: str, novel_type: str = "web_novel") -> dict:
     """Initialize a novel project directory with all required files."""
     novel_root = os.path.join(project_path, NOVEL_DIR)
+
+    if os.path.exists(novel_root):
+        return {"status": "error", "message": f"Project already exists at {novel_root}"}
+
     knowledge_root = os.path.join(novel_root, "knowledge")
     output_root = os.path.join(project_path, CONFIG_TEMPLATE["output"]["base_dir"])
 
@@ -84,11 +89,11 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
     for d in OUTPUT_DIRS:
         os.makedirs(os.path.join(output_root, d), exist_ok=True)
 
-    config = CONFIG_TEMPLATE.copy()
+    config = copy.deepcopy(CONFIG_TEMPLATE)
     config["project"]["title"] = title
     config["project"]["type"] = novel_type
 
-    state = STATE_TEMPLATE.copy()
+    state = copy.deepcopy(STATE_TEMPLATE)
     state["project"] = title
     state["created_at"] = datetime.now().isoformat()
     state["updated_at"] = state["created_at"]
@@ -122,4 +127,7 @@ if __name__ == "__main__":
     ntype = sys.argv[3] if len(sys.argv) > 3 else "web_novel"
 
     result = init_project(path, title, ntype)
+    if result["status"] == "error":
+        print(f"Error: {result['message']}")
+        sys.exit(1)
     print(f"Project '{result['title']}' initialized at {result['path']}")
