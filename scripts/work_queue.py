@@ -55,3 +55,64 @@ class WorkQueue:
 
     def count_pending(self) -> int:
         return len(self.list_pending())
+
+
+if __name__ == "__main__":
+    import sys
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Work Queue Manager")
+    sub = parser.add_subparsers(dest="cmd")
+
+    add_p = sub.add_parser("add")
+    add_p.add_argument("--type", required=True)
+    add_p.add_argument("--source", required=True)
+    add_p.add_argument("--target", required=True)
+    add_p.add_argument("--desc", required=True)
+    add_p.add_argument("--action", required=True)
+
+    sub.add_parser("list")
+    sub.add_parser("pending")
+
+    resolve_p = sub.add_parser("resolve")
+    resolve_p.add_argument("id")
+
+    args = parser.parse_args()
+
+    if args.cmd is None:
+        parser.print_help()
+        sys.exit(1)
+
+    cwd = os.getcwd()
+    while cwd != "/":
+        if os.path.isdir(os.path.join(cwd, ".novel")):
+            break
+        cwd = os.path.dirname(cwd)
+
+    if cwd == "/":
+        print("Error: Not in a novel project. Run init first.")
+        sys.exit(1)
+
+    wq = WorkQueue(cwd)
+
+    if args.cmd == "add":
+        tid = wq.add(args.type, args.source, args.target, args.desc, args.action)
+        print(f"Task {tid} added to work queue")
+    elif args.cmd == "list":
+        tasks = wq.read()["tasks"]
+        if not tasks:
+            print("No tasks in work queue")
+        else:
+            for t in tasks:
+                status_icon = "✅" if t["status"] == "resolved" else "⏳"
+                print(f"  [{t['id']}] {status_icon} {t['description']} → {t['target_agent']}")
+    elif args.cmd == "pending":
+        tasks = wq.list_pending()
+        if not tasks:
+            print("No pending tasks")
+        else:
+            for t in tasks:
+                print(f"  [{t['id']}] {t['description']} → {t['target_agent']}")
+    elif args.cmd == "resolve":
+        wq.resolve(args.id)
+        print(f"Task {args.id} resolved")
