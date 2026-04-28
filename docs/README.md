@@ -1,6 +1,6 @@
 # Novel Writer — 小说写作工作流
 
-基于 Claude Code Agent 体系的小说写作自动化工具。覆盖大纲构思、背景设定、人物设定、正文编写到审阅校对五个环节，每个环节由独立 Agent 负责，关键节点支持人工审核。
+基于 Claude Code Agent 体系的小说写作自动化工具。覆盖大纲构思、背景设定、人物设定、正文编写到审阅校对五个环节，大纲和背景设定通过脑暴问答确定方向后由 Agent 生成，人物设定先生成初版再脑暴修正，关键节点支持人工审核。
 
 ## 快速开始
 
@@ -34,6 +34,10 @@ my-novel/
 │   ├── config.yml             #   配置
 │   ├── state.yml              #   运行状态
 │   ├── work_queue.yml         #   审阅工作队列
+│   ├── brainstorm/             #   脑暴中间状态
+│   │   ├── outline.yml         #     大纲脑暴结论
+│   │   ├── world.yml           #     背景设定脑暴结论
+│   │   └── character.yml       #     人物修正记录
 │   └── knowledge/             #   知识图谱（设定真相源）
 │       ├── characters/        #     人物条目
 │       ├── world/             #     世界观条目
@@ -54,12 +58,12 @@ my-novel/
 
 | 命令 | 用途 |
 |------|------|
-| `novelwriting init <path> <title> [type]` | 创建新小说项目 |
+| `novelwriting init <path> <title>` | 创建新小说项目 |
 | `novelwriting serve` | 启动 Web 界面 |
 | `novelwriting list` | 列出所有已注册项目 |
 | `novelwriting status [path]` | 查看项目阶段进度 |
 
-`type` 可选值：`web_novel`（默认，网络小说）、`short_story`（短篇小说）。
+类型和模板在后续脑暴问答中确定，不再在 `init` 时指定。
 
 ## Web 界面
 
@@ -78,25 +82,25 @@ novelwriting serve
 
 ## Claude Code 工作流
 
-在项目目录中使用 `/` 命令驱动各阶段 Agent：
+在项目目录中使用 `/` 命令驱动各阶段 Agent。
 
-| 命令 | Agent | 功能 |
+| 命令 | Agent | 流程 |
 |------|-------|------|
-| `/novel-outline generate` | 大纲构思 | 生成情节大纲、卷章结构、节奏规划 |
-| `/novel-world generate [--depth]` | 背景设定 | 生成世界观、地理、历史、势力、力量体系 |
-| `/novel-character generate [--depth]` | 人物设定 | 生成人物档案、关系网、成长弧线 |
+| `/novel-outline generate` | 大纲构思 | 脑暴问答确定方向 → agent 生成文件 |
+| `/novel-world generate` | 背景设定 | 脑暴问答确定方向 → agent 生成文件 |
+| `/novel-character generate` | 人物设定 | agent 生成初版 → 脑暴对话修正迭代 |
 | `/novel-draft write <N>` | 正文编写 | 按大纲和三层上下文写第 N 章 |
 | `/novel-review check <N>` | 审阅校对 | 多维度检查第 N 章质量 |
-| `/novel status` | 主编协调 | 查看项目整体状态 |
+| `/novel status` | 主编协调 | 查看项目整体状态（含脑暴进度） |
 | `/novel work-queue` | 主编协调 | 查看审阅发现的待处理问题 |
 | `/novel-kg query "..."` | 知识管理 | 自然语言查询知识图谱 |
 
 ### 工作流顺序
 
 ```
-大纲构思 → 背景设定 → 人物设定 → 正文编写 → 审阅校对
-   ↑                                    ↓
-   └──────── 问题回调修订 ──────────────┘
+脑暴大纲 → 脑暴背景 → 生成人物初版 → 脑暴修正人物 → 正文编写 → 审阅校对
+                ↑                                                    ↓
+                └──────────── 问题回调修订 ──────────────────────────┘
 ```
 
 ### 审核配置
@@ -124,7 +128,7 @@ checkpoints:
 
 ## 写作模板
 
-内置 8 种写作方法论模板，在 `config.yml` 中选择：
+内置 8 种写作方法论模板，在大纲脑暴问答中选择：
 
 - `web_trope` — 金手指/升级流
 - `web_xianxia` — 修仙
