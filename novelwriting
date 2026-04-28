@@ -13,12 +13,11 @@ usage() {
     echo "Usage: novelwriting {init|serve|list|status} [args...]"
     echo ""
     echo "Commands:"
-    echo "  init <path> <title> [type]    Create a new novel project"
+    echo "  init <path> <title>          Create a new novel project"
     echo "  serve                         Start the web server"
     echo "  list                          List all registered projects"
     echo "  status [project-path]         Show project status"
     echo ""
-    echo "Type: web_novel (default) | short_story"
     exit 1
 }
 
