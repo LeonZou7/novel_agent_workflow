@@ -38,7 +38,7 @@ case "$1" in
     serve)
         shift
         ensure_deps
-        echo "Starting server at http://localhost:5000"
+        echo "Starting server at http://localhost:8080"
         python3 "$TOOL_DIR/web/server.py" "$@"
         ;;
 

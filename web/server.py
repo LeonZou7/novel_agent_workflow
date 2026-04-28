@@ -213,5 +213,7 @@ def api_reviews():
 
 
 if __name__ == "__main__":
-    print("Starting Novel Writer Web Server on http://localhost:5000")
-    app.run(debug=True, port=5000)
+    import sys
+    port = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 8080
+    print(f"Starting Novel Writer Web Server on http://localhost:{port}")
+    app.run(debug=True, port=port)
