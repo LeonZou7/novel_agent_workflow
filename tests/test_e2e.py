@@ -42,6 +42,70 @@ class TestE2E(unittest.TestCase):
             path = os.path.join(self.tmpdir, d)
             self.assertTrue(os.path.isdir(path), f"Missing: {d}")
 
+    def test_01b_brainstorm_directory(self):
+        """Verify brainstorm/ directory is empty and ready for use."""
+        import yaml
+
+        brainstorm_dir = os.path.join(self.tmpdir, ".novel", "brainstorm")
+        self.assertTrue(os.path.isdir(brainstorm_dir))
+
+        # Verify no stale brainstorm files exist
+        outline_path = os.path.join(brainstorm_dir, "outline.yml")
+        world_path = os.path.join(brainstorm_dir, "world.yml")
+        character_path = os.path.join(brainstorm_dir, "character.yml")
+        self.assertFalse(os.path.exists(outline_path))
+        self.assertFalse(os.path.exists(world_path))
+        self.assertFalse(os.path.exists(character_path))
+
+    def test_01c_brainstorm_outline_yml(self):
+        """Test the brainstorm outline.yml lifecycle: pending to confirmed."""
+        import yaml
+
+        outline_path = os.path.join(self.tmpdir, ".novel", "brainstorm", "outline.yml")
+
+        # Simulate director starting brainstorm
+        brainstorm = {
+            "status": "pending",
+            "config": {
+                "type": "web_novel",
+                "methodology": "web_xianxia",
+                "language": "zh-CN",
+            },
+            "summary": "",
+            "questions": [
+                {"q": "小说类型？", "a": "网络小说"},
+            ],
+        }
+        with open(outline_path, "w", encoding="utf-8") as f:
+            yaml.dump(brainstorm, f, allow_unicode=True, default_flow_style=False)
+
+        # Verify pending state
+        with open(outline_path, "r", encoding="utf-8") as f:
+            saved = yaml.safe_load(f)
+        self.assertEqual(saved["status"], "pending")
+        self.assertEqual(saved["config"]["type"], "web_novel")
+
+        # Simulate user confirming
+        saved["status"] = "confirmed"
+        saved["summary"] = "一个关于复仇与成长的修仙故事……"
+        saved["questions"].extend([
+            {"q": "写作方法论？", "a": "web_xianxia"},
+            {"q": "语言？", "a": "zh-CN"},
+            {"q": "核心主题？", "a": "复仇与成长"},
+            {"q": "主角核心冲突？", "a": "卧底仇人门下"},
+            {"q": "结局走向？", "a": "HE"},
+            {"q": "特别元素？", "a": "宗门大比"},
+        ])
+        with open(outline_path, "w", encoding="utf-8") as f:
+            yaml.dump(saved, f, allow_unicode=True, default_flow_style=False)
+
+        # Verify confirmed state
+        with open(outline_path, "r", encoding="utf-8") as f:
+            confirmed = yaml.safe_load(f)
+        self.assertEqual(confirmed["status"], "confirmed")
+        self.assertEqual(len(confirmed["questions"]), 7)
+        self.assertIsNotNone(confirmed["summary"])
+
     def test_02_config_file(self):
         """Verify config.yml has all required keys."""
         import yaml
