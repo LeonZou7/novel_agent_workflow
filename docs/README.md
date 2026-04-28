@@ -65,7 +65,7 @@ my-novel/
 
 ```bash
 novelwriting serve
-# → 打开 http://localhost:5000
+# → 打开 http://localhost:8080
 ```
 
 功能页面：
