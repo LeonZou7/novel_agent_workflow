@@ -12,16 +12,16 @@ from projects import ProjectRegistry
 CONFIG_TEMPLATE = {
     "project": {
         "title": "",
-        "type": "web_novel",
-        "language": "zh-CN",
+        "type": None,
+        "language": None,
     },
     "template": {
-        "methodology": "web_trope",
+        "methodology": None,
         "custom_template_path": None,
     },
     "depth": {
-        "world": "deep",
-        "character": "deep",
+        "world": "standard",
+        "character": "standard",
     },
     "review": {
         "enable_proofreading": True,
@@ -75,7 +75,7 @@ NOVEL_DIR = ".novel"
 PACKAGE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def init_project(project_path: str, title: str, novel_type: str = "web_novel") -> dict:
+def init_project(project_path: str, title: str) -> dict:
     """Initialize a novel project directory with all required files."""
     novel_root = os.path.join(project_path, NOVEL_DIR)
 
@@ -95,9 +95,12 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
     for d in OUTPUT_DIRS:
         os.makedirs(os.path.join(output_root, d), exist_ok=True)
 
+    # Create brainstorm directory for Q&A state persistence
+    brainstorm_root = os.path.join(novel_root, "brainstorm")
+    os.makedirs(brainstorm_root, exist_ok=True)
+
     config = copy.deepcopy(CONFIG_TEMPLATE)
     config["project"]["title"] = title
-    config["project"]["type"] = novel_type
 
     state = copy.deepcopy(STATE_TEMPLATE)
     state["project"] = title
@@ -127,9 +130,9 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
         for src_file in glob.glob(os.path.join(skills_src, "novel-*.md")):
             shutil.copy2(src_file, skills_dst)
 
-    # Register in global project list
+    # Register in global project list (type is None until brainstorm determines it)
     registry = ProjectRegistry()
-    registry.register(project_path, title, novel_type)
+    registry.register(project_path, title, None)
 
     return {"status": "ok", "path": project_path, "title": title}
 
@@ -137,14 +140,13 @@ def init_project(project_path: str, title: str, novel_type: str = "web_novel") -
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 3:
-        print("Usage: python init_project.py <project_path> <title> [type]")
+        print("Usage: python init_project.py <project_path> <title>")
         sys.exit(1)
 
     path = sys.argv[1]
     title = sys.argv[2]
-    ntype = sys.argv[3] if len(sys.argv) > 3 else "web_novel"
 
-    result = init_project(path, title, ntype)
+    result = init_project(path, title)
     if result["status"] == "error":
         print(f"Error: {result['message']}")
         sys.exit(1)

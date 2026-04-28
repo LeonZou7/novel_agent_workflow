@@ -19,7 +19,7 @@ class TestE2E(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmpdir = tempfile.mkdtemp()
-        init_project(cls.tmpdir, "E2E测试小说", "web_novel")
+        init_project(cls.tmpdir, "E2E测试小说")
 
     def test_01_directory_structure(self):
         """Verify all directories were created."""
@@ -30,6 +30,7 @@ class TestE2E(unittest.TestCase):
             ".novel/knowledge/world",
             ".novel/knowledge/plot",
             ".novel/knowledge/chapters",
+            ".novel/brainstorm",
             "novel",
             "novel/outline",
             "novel/world",
@@ -47,7 +48,8 @@ class TestE2E(unittest.TestCase):
         with open(os.path.join(self.tmpdir, ".novel", "config.yml"), "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
         self.assertEqual(config["project"]["title"], "E2E测试小说")
-        self.assertEqual(config["project"]["type"], "web_novel")
+        self.assertIsNone(config["project"]["type"])
+        self.assertIsNone(config["project"]["language"])
         self.assertIn("checkpoints", config)
 
     def test_03_kg_write_read(self):
@@ -149,7 +151,7 @@ class TestE2E(unittest.TestCase):
         # Create a second temp project
         d2 = tempfile.mkdtemp()
         self.addCleanup(lambda: self._cleanup_project(d2))
-        init_project(d2, "第二本小说", "short_story")
+        init_project(d2, "第二本小说")
 
         projects = registry.list_projects()
         self.assertEqual(len(projects), old_count + 1)

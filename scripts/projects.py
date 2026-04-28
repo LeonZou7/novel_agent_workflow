@@ -30,7 +30,7 @@ class ProjectRegistry:
         """Return all registered projects with their paths and metadata."""
         return self._read().get("projects", [])
 
-    def register(self, path: str, title: str, novel_type: str = "web_novel"):
+    def register(self, path: str, title: str, novel_type: str = None):
         """Add a project to the registry. Does nothing if already registered."""
         path = os.path.abspath(path)
         data = self._read()
