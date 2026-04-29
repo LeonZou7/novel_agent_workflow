@@ -200,7 +200,20 @@ all_concepts:
 
 2. 将 config 写入 `.novel/config.yml`（合并默认值）
 3. 更新 `.novel/brainstorm/outline.yml` status 为 `confirmed`
-4. 调度大纲 Agent，传入 selected_concept 中的创意摘要
+
+**覆盖保护检查：**
+1. 读取 `.novel/state.yml` 中 `draft.last_chapter`
+2. 如果 `last_chapter > 0`（已有章节），显示警告：
+
+```
+⚠️ 项目已有 {N} 章正文。重新生成大纲可能导致与已有内容不一致。
+输入"确认覆盖"继续，或"取消"放弃。
+```
+
+3. 用户输入"确认覆盖" → 继续调度
+4. 用户输入"取消" → 终止流程，提示可使用 `/novel-outline revise` 做增量修改
+
+5. 调度大纲 Agent，传入 selected_concept 中的创意摘要
 
 ### 第八步：调度大纲 Agent
 
@@ -306,7 +319,20 @@ all_concepts: []   # 5 个原始概念
 ```
 
 2. 更新 `.novel/brainstorm/world.yml` status 为 `confirmed`
-3. 调度 world agent，传入 selected_concept + 大纲 KG + config
+
+**覆盖保护检查：**
+1. 读取 `.novel/state.yml` 中 `draft.last_chapter`
+2. 如果 `last_chapter > 0`，显示警告：
+
+```
+⚠️ 项目已有 {N} 章正文。重新生成世界观可能导致与已有内容不一致。
+输入"确认覆盖"继续，或"取消"放弃。
+```
+
+3. 用户输入"确认覆盖" → 继续
+4. 用户输入"取消" → 终止，提示可使用 `/novel-world revise` 做增量修改
+
+5. 调度 world agent，传入 selected_concept + 大纲 KG + config
 
 ### 第八步：调度 World Agent
 
@@ -335,6 +361,21 @@ World Agent 生成文件后：
 - **status: pending** 或 **文件不存在** → 进入生成流程
 
 ### 第三步：直接调度 character agent 生成初版
+
+**覆盖保护检查：**
+1. 检查 `novel/characters/` 目录是否已有子目录
+2. 如有已存在的人物设定，列出并警告：
+
+```
+⚠️ 已存在以下人物设定：
+  - 主角/ (profile.md, growth_arc.yml, ...)
+  - 反派/ (profile.md, ...)
+重新生成将覆盖以上文件。输入"确认覆盖"继续，或"取消"放弃。
+建议使用 `/novel-character revise` 做增量修改。
+```
+
+3. 用户输入"确认覆盖" → 继续
+4. 用户输入"取消" → 终止
 
 读取 config.yml + 大纲 KG + 世界观 KG，将所有已有设定传给 character agent。
 
@@ -475,3 +516,5 @@ revisions:
 | 脑暴中改变主意 | 用户说「回到上个问题」，回到上一个问答 |
 | Agent 生成结果不满意 | 回到摘要确认环节，重新确认方向后再次生成 |
 | 已有项目（config 完整） | 跳过配置问答（Q1-Q3），只做创意脑暴（Q4-Q7） |
+| 已有章节时重新生成大纲/世界观 | 检测到 last_chapter > 0，警告不一致性风险，要求用户输入"确认覆盖" |
+| 已有人物时重新生成 | 列出已存在人物，要求确认覆盖，建议使用 revise |
