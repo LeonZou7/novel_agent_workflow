@@ -229,40 +229,86 @@ all_concepts:
 - **status: pending** → 提示恢复或重来
 - **文件不存在** → 进入脑暴
 
-### 第三步：核心设定问答
+### 第三步：调用 world agent 生成概念
 
-逐一询问，每问一个等用户回答后写入 world.yml（status: pending）：
+调度 world agent 的 brainstorm 模式，传入：
+- 基调（从 Q1 回答获取）
+- 力量体系方向（从 Q2 回答获取）
+- 模板名（从 config 读取）
+- 模板文件路径：`templates/{methodology}.yml`
 
-**Q1: 世界观基调？** 提供选项参考：
-- 仙侠古典 / 都市异能 / 末世废土 / 架空历史 / 科幻星际 / 西方奇幻 / 其他
+接收 5 个世界观概念后继续下一步。
 
-**Q2: 核心力量体系方向？**
-- 灵力修炼 / 科技强化 / 血脉觉醒 / 契约召唤 / 无特殊力量 / 其他
+### 第四步：展示概念供选择
 
-**Q3: 主要势力格局方向？**
-- 正邪对立 / 多势力制衡 / 混乱无序 / 统一帝国 / 其他
+将 5 个概念以列表形式展示给用户：
 
-**Q4: 有什么特别想包含的世界观元素？**（可选）
+```
+🌍 世界观概念选择
 
-### 第四步：输出摘要确认
+1. 《世界名A》— 基调描述 | 力量体系：…… | 势力格局：……
+2. 《世界名B》— 基调描述 | 力量体系：…… | 势力格局：……
+3. 《世界名C》— 基调描述 | 力量体系：…… | 势力格局：……
+4. 《世界名D》— 基调描述 | 力量体系：…… | 势力格局：……
+5. 《世界名E》— 基调描述 | 力量体系：…… | 势力格局：……
+
+选哪个？输入编号。
+```
+
+### 第五步：展示细节 + 修改
+
+用户选择后，展示选中概念的完整信息：
+
+```
+🌍 选定世界观：《世界名》
+
+基调：……
+力量体系：……
+势力格局：……
+特色元素：元素1、元素2
+
+需要修改哪些部分？直接说改哪里，或者说"确认"继续。
+```
+
+修改循环：
+- 用户每次提出修改，更新对应字段，再次展示完整信息
+- 循环直到用户说「确认」或「可以了」
+
+### 第六步：输出摘要确认
+
+确认后输出最终摘要：
 
 ```
 🌍 背景设定脑暴摘要
 
-世界观基调：仙侠古典
-力量体系：灵力修炼（修仙等级制）
-势力格局：三宗四派 + 魔教对立
-特别元素：上古遗迹探索
+世界观基调：……
+力量体系：……
+势力格局：……
+特色元素：……
 
 是否确认以上方向？
 ```
 
-### 第五步：确认后处理
+### 第七步：确认后处理
 
-1. 更新 `.novel/brainstorm/world.yml` status 为 `confirmed`
-2. 调度 world agent，传入核心设定摘要 + 大纲 KG + config
+1. 将脑暴结果写入 `.novel/brainstorm/world.yml`（新格式）：
 
-### 第六步：调度 World Agent
+```yaml
+status: confirmed
+selected_concept:
+  name: "世界名"
+  tone: "基调"
+  power_system: "力量体系"
+  faction_structure: "势力格局"
+  elements: ["元素1", "元素2"]
+modifications: []  # 用户修改记录
+all_concepts: []   # 5 个原始概念
+```
+
+2. 更新 `.novel/brainstorm/world.yml` status 为 `confirmed`
+3. 调度 world agent，传入 selected_concept + 大纲 KG + config
+
+### 第八步：调度 World Agent
 
 传入结构化输入：
 - 核心设定摘要
@@ -382,18 +428,28 @@ all_concepts:
 ### `.novel/brainstorm/world.yml`
 
 ```yaml
-status: pending
-summary: |
-  世界观基调摘要……
-questions:
-  - q: "世界观基调？"
-    a: "仙侠古典"
-  - q: "核心力量体系方向？"
-    a: "灵力修炼"
-  - q: "主要势力格局方向？"
-    a: "正邪对立"
-  - q: "特别想包含的世界观元素？"
-    a: "上古遗迹探索"
+status: confirmed
+selected_concept:
+  name: "世界名"
+  tone: "基调"
+  power_system: "力量体系"
+  faction_structure: "势力格局"
+  elements: ["元素1", "元素2"]
+modifications:
+  - field: "power_system"
+    original: "原值"
+    modified: "新值"
+all_concepts:
+  - name: "世界名1"
+    tone: "..."
+    power_system: "..."
+    faction_structure: "..."
+    elements: [...]
+  - name: "世界名2"
+    tone: "..."
+    power_system: "..."
+    faction_structure: "..."
+    elements: [...]
 ```
 
 ### `.novel/brainstorm/character.yml`
