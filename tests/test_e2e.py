@@ -58,12 +58,12 @@ class TestE2E(unittest.TestCase):
         self.assertFalse(os.path.exists(character_path))
 
     def test_01c_brainstorm_outline_yml(self):
-        """Test the brainstorm outline.yml lifecycle: pending to confirmed."""
+        """Test the brainstorm outline.yml lifecycle: pending to confirmed (new format)."""
         import yaml
 
         outline_path = os.path.join(self.tmpdir, ".novel", "brainstorm", "outline.yml")
 
-        # Simulate director starting brainstorm
+        # Simulate director starting brainstorm with concept selection
         brainstorm = {
             "status": "pending",
             "config": {
@@ -71,9 +71,11 @@ class TestE2E(unittest.TestCase):
                 "methodology": "web_xianxia",
                 "language": "zh-CN",
             },
-            "summary": "",
-            "questions": [
-                {"q": "小说类型？", "a": "网络小说"},
+            "selected_concept": None,
+            "modifications": [],
+            "all_concepts": [
+                {"title": "概念A", "theme": "复仇", "conflict": "卧底", "ending": "HE", "elements": ["宗门大比"], "pitch": "..."},
+                {"title": "概念B", "theme": "成长", "conflict": "身世之谜", "ending": "开放", "elements": ["上古遗迹"], "pitch": "..."},
             ],
         }
         with open(outline_path, "w", encoding="utf-8") as f:
@@ -84,18 +86,21 @@ class TestE2E(unittest.TestCase):
             saved = yaml.safe_load(f)
         self.assertEqual(saved["status"], "pending")
         self.assertEqual(saved["config"]["type"], "web_novel")
+        self.assertEqual(len(saved["all_concepts"]), 2)
 
-        # Simulate user confirming
+        # Simulate user selecting a concept and confirming
         saved["status"] = "confirmed"
-        saved["summary"] = "一个关于复仇与成长的修仙故事……"
-        saved["questions"].extend([
-            {"q": "写作方法论？", "a": "web_xianxia"},
-            {"q": "语言？", "a": "zh-CN"},
-            {"q": "核心主题？", "a": "复仇与成长"},
-            {"q": "主角核心冲突？", "a": "卧底仇人门下"},
-            {"q": "结局走向？", "a": "HE"},
-            {"q": "特别元素？", "a": "宗门大比"},
-        ])
+        saved["selected_concept"] = {
+            "title": "概念A",
+            "theme": "复仇",
+            "conflict": "卧底仇人门下",
+            "ending": "HE",
+            "elements": ["宗门大比", "隐世传承"],
+            "pitch": "一个被灭门的少年...",
+        }
+        saved["modifications"] = [
+            {"field": "conflict", "original": "卧底", "modified": "卧底仇人门下"},
+        ]
         with open(outline_path, "w", encoding="utf-8") as f:
             yaml.dump(saved, f, allow_unicode=True, default_flow_style=False)
 
@@ -103,8 +108,9 @@ class TestE2E(unittest.TestCase):
         with open(outline_path, "r", encoding="utf-8") as f:
             confirmed = yaml.safe_load(f)
         self.assertEqual(confirmed["status"], "confirmed")
-        self.assertEqual(len(confirmed["questions"]), 7)
-        self.assertIsNotNone(confirmed["summary"])
+        self.assertIsNotNone(confirmed["selected_concept"])
+        self.assertEqual(confirmed["selected_concept"]["ending"], "HE")
+        self.assertEqual(len(confirmed["modifications"]), 1)
 
     def test_02_config_file(self):
         """Verify config.yml has all required keys."""
