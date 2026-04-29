@@ -19,6 +19,12 @@ source ~/.zshrc
 pip3 install pyyaml flask
 ```
 
+安装 Claude Code 技能（符号链接到 `~/.claude/skills/`，修改仓库中的技能后自动生效）：
+
+```bash
+novelwriting install-skills
+```
+
 ### 创建第一个项目
 
 ```bash
@@ -46,6 +52,13 @@ my-novel/
 │       ├── foreshadowing.yml  #     伏笔追踪
 │       └── timeline.yml       #     大事年表
 ├── .claude/skills/            # Claude Code Agent 技能（自动复制）
+│   ├── novel-director/SKILL.md
+│   ├── novel-outline/SKILL.md
+│   ├── novel-world/SKILL.md
+│   ├── novel-character/SKILL.md
+│   ├── novel-draft/SKILL.md
+│   ├── novel-review/SKILL.md
+│   └── novel-kg/SKILL.md
 └── novel/                     # 写作产物
     ├── outline/               #   大纲
     ├── world/                 #   背景设定
@@ -59,6 +72,7 @@ my-novel/
 | 命令 | 用途 |
 |------|------|
 | `novelwriting init <path> <title>` | 创建新小说项目 |
+| `novelwriting install-skills` | 将 novel-* 技能符号链接到 `~/.claude/skills/` |
 | `novelwriting serve` | 启动 Web 界面 |
 | `novelwriting list` | 列出所有已注册项目 |
 | `novelwriting status [path]` | 查看项目阶段进度 |
@@ -81,6 +95,8 @@ novelwriting serve
 页面左上角下拉框可切换已注册的项目。
 
 ## Claude Code 工作流
+
+首次使用前先安装技能：`novelwriting install-skills`（或在项目目录下运行 `novelwriting init`，技能会自动复制到项目中）。
 
 在项目目录中使用 `/` 命令驱动各阶段 Agent。
 
@@ -138,6 +154,24 @@ checkpoints:
 - `hero_journey` — 英雄之旅
 - `save_the_cat` — Save the Cat! 节拍表
 - `short_story_basic` — 短篇小说基础
+
+## 技能开发
+
+技能文件位于 `.claude/skills/novel-*/SKILL.md`，与项目代码一同版本控制。修改后：
+
+- 项目内的技能：`novelwriting init` 的项目会使用复制的版本
+- 全局安装的技能：通过 `install-skills` 创建的符号链接自动指向仓库，无需重新安装
+
+```
+.claude/skills/
+├── novel-director/SKILL.md    # 主编协调
+├── novel-outline/SKILL.md     # 大纲构思
+├── novel-world/SKILL.md       # 背景设定
+├── novel-character/SKILL.md   # 人物设定
+├── novel-draft/SKILL.md       # 正文编写
+├── novel-review/SKILL.md      # 审阅校对
+└── novel-kg/SKILL.md          # 知识图谱管理
+```
 
 ## 全局项目注册表
 

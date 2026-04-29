@@ -10,13 +10,14 @@ set -e
 TOOL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 usage() {
-    echo "Usage: novelwriting {init|serve|list|status} [args...]"
+    echo "Usage: novelwriting {init|serve|list|status|install-skills} [args...]"
     echo ""
     echo "Commands:"
     echo "  init <path> <title>          Create a new novel project"
     echo "  serve                         Start the web server"
     echo "  list                          List all registered projects"
     echo "  status [project-path]         Show project status"
+    echo "  install-skills                Symlink novel skills to ~/.claude/skills/"
     echo ""
     exit 1
 }
@@ -101,6 +102,28 @@ for name, info in stages.items():
         extra = f'  (第 {info.get(\"last_chapter\", 0)} 章)'
     print(f'  {icon} {name}  v{ver}{extra}')
 "
+        ;;
+
+    install-skills)
+        GLOBAL_SKILLS="$HOME/.claude/skills"
+        TOOL_SKILLS="$TOOL_DIR/.claude/skills"
+        mkdir -p "$GLOBAL_SKILLS"
+        count=0
+        for dir in "$TOOL_SKILLS"/novel-*/; do
+            [ -d "$dir" ] || continue
+            name="$(basename "$dir")"
+            target="$GLOBAL_SKILLS/$name"
+            if [ -L "$target" ]; then
+                rm "$target"
+            elif [ -d "$target" ]; then
+                echo "  skip: $name (existing directory, not a symlink)"
+                continue
+            fi
+            ln -s "$dir" "$target"
+            echo "  linked: $name"
+            count=$((count + 1))
+        done
+        echo "Done. $count skills linked to $GLOBAL_SKILLS"
         ;;
 
     *)

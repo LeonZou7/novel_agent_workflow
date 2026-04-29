@@ -5,7 +5,6 @@ import os
 import yaml
 import copy
 import shutil
-import glob
 from datetime import datetime
 from projects import ProjectRegistry
 
@@ -126,9 +125,9 @@ def init_project(project_path: str, title: str) -> dict:
     skills_src = os.path.join(PACKAGE_DIR, ".claude", "skills")
     skills_dst = os.path.join(project_path, ".claude", "skills")
     if os.path.isdir(skills_src):
-        os.makedirs(skills_dst, exist_ok=True)
-        for src_file in glob.glob(os.path.join(skills_src, "novel-*.md")):
-            shutil.copy2(src_file, skills_dst)
+        for entry in os.listdir(skills_src):
+            if entry.startswith("novel-") and os.path.isdir(os.path.join(skills_src, entry)):
+                shutil.copytree(os.path.join(skills_src, entry), os.path.join(skills_dst, entry))
 
     # Register in global project list (type is None until brainstorm determines it)
     registry = ProjectRegistry()
