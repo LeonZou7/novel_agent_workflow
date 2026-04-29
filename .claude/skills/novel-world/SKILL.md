@@ -71,3 +71,38 @@ relationships:
 1. 读取指定条目
 2. 根据用户指令修改
 3. 更新 KG 对应条目，记录版本变化
+
+### brainstorm — 生成世界观概念供选择
+
+1. 读取主编传入的基调、力量体系方向、模板名
+2. 读取 `templates/{methodology}.yml` 模板文件，理解该类型的世界观特征
+3. 基于基调和力量体系方向，生成 5 个差异化世界观概念
+4. 每个概念包含：
+   - `name`: 世界观名称
+   - `tone`: 基调描述（一段话描述整体氛围）
+   - `power_system`: 力量体系概要（等级划分、核心机制）
+   - `faction_structure`: 势力格局描述（主要势力及其关系）
+   - `elements`: 2-3 个特色元素（独特的世界观亮点）
+5. 5 个概念应在同一基调下提供不同的世界观架构思路
+6. 输出为结构化 YAML 格式
+
+输出格式：
+```yaml
+world_concepts:
+  - name: "世界名"
+    tone: "基调描述"
+    power_system: "力量体系概要"
+    faction_structure: "势力格局"
+    elements: ["元素1", "元素2"]
+  - name: "世界名2"
+    tone: "基调描述"
+    power_system: "力量体系概要"
+    faction_structure: "势力格局"
+    elements: ["元素1", "元素2", "元素3"]
+```
+
+输入来源（主编在调度时提供）：
+1. 世界观基调（如：仙侠古典、都市异能、末世废土等）
+2. 力量体系方向（如：灵力修炼、科技强化、血脉觉醒等）
+3. 模板名
+4. `templates/{methodology}.yml` 模板文件路径
