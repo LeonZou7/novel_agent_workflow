@@ -85,3 +85,41 @@ foreshadowing_planted: []
 1. 读取用户指定的文件
 2. 根据用户指令修改
 3. 如修改涉及 KG 条目，同步更新 KG
+
+### brainstorm — 生成故事概念供选择
+
+1. 读取主编传入的类型、模板名、语言
+2. 读取 `templates/{methodology}.yml` 模板文件，理解该类型的故事结构特征和节拍
+3. 基于模板风格，生成 5 个差异化的故事概念
+4. 每个概念包含：
+   - `title`: 暂定标题
+   - `theme`: 一句话主题
+   - `conflict`: 核心冲突描述
+   - `ending`: 结局走向 (HE/BE/开放)
+   - `elements`: 2-3 个关键元素
+   - `pitch`: 一段 50-100 字的故事简介
+5. 5 个概念应覆盖不同的主题方向，确保差异化（如：复仇、成长、守护、逆袭、探索）
+6. 输出为结构化 YAML 格式
+
+输出格式：
+```yaml
+concepts:
+  - title: "标题"
+    theme: "一句话主题"
+    conflict: "核心冲突描述"
+    ending: "HE"
+    elements: ["元素1", "元素2", "元素3"]
+    pitch: "50-100字故事简介"
+  - title: "标题2"
+    theme: "一句话主题"
+    conflict: "核心冲突描述"
+    ending: "BE"
+    elements: ["元素1", "元素2"]
+    pitch: "50-100字故事简介"
+```
+
+输入来源（主编在调度时提供）：
+1. 小说类型（web_novel / short_story）
+2. 模板名（如 web_xianxia）
+3. 语言
+4. `templates/{methodology}.yml` 模板文件路径
