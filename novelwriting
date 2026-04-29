@@ -109,7 +109,7 @@ for name, info in stages.items():
         TOOL_SKILLS="$TOOL_DIR/.claude/skills"
         mkdir -p "$GLOBAL_SKILLS"
         count=0
-        for dir in "$TOOL_SKILLS"/novel-*/; do
+        for dir in "$TOOL_SKILLS"/znovel-*/; do
             [ -d "$dir" ] || continue
             name="$(basename "$dir")"
             target="$GLOBAL_SKILLS/$name"

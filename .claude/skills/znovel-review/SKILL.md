@@ -1,5 +1,5 @@
 ---
-name: novel-review
+name: znovel-review
 description: 小说审阅校对 - 错别字/语法/一致性/风格评估，发现问题通过工作队列回调
 ---
 

@@ -121,12 +121,12 @@ def init_project(project_path: str, title: str) -> dict:
     with open(os.path.join(knowledge_root, "timeline.yml"), "w") as f:
         yaml.dump({"events": []}, f, allow_unicode=True, default_flow_style=False)
 
-    # Copy bundled skills into the project so /novel-* commands work out of the box
+    # Copy bundled skills into the project so /znovel-* commands work out of the box
     skills_src = os.path.join(PACKAGE_DIR, ".claude", "skills")
     skills_dst = os.path.join(project_path, ".claude", "skills")
     if os.path.isdir(skills_src):
         for entry in os.listdir(skills_src):
-            if entry.startswith("novel-") and os.path.isdir(os.path.join(skills_src, entry)):
+            if entry.startswith("znovel-") and os.path.isdir(os.path.join(skills_src, entry)):
                 shutil.copytree(os.path.join(skills_src, entry), os.path.join(skills_dst, entry))
 
     # Register in global project list (type is None until brainstorm determines it)

@@ -1,5 +1,5 @@
 ---
-name: novel-kg
+name: znovel-kg
 description: 知识图谱管理 - 查询、对比、影响分析
 ---
 

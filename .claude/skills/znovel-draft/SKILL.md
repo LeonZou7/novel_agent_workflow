@@ -1,5 +1,5 @@
 ---
-name: novel-draft
+name: znovel-draft
 description: 小说正文编写 - 按大纲+设定写章节正文，自动更新KG摘要
 ---
 

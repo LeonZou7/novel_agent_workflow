@@ -1,5 +1,5 @@
 ---
-name: novel-world
+name: znovel-world
 description: 小说背景设定 - 接收核心设定摘要，生成世界观、地理、历史、势力、力量体系
 ---
 

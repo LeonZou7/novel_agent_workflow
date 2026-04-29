@@ -52,13 +52,13 @@ my-novel/
 │       ├── foreshadowing.yml  #     伏笔追踪
 │       └── timeline.yml       #     大事年表
 ├── .claude/skills/            # Claude Code Agent 技能（自动复制）
-│   ├── novel-director/SKILL.md
-│   ├── novel-outline/SKILL.md
-│   ├── novel-world/SKILL.md
-│   ├── novel-character/SKILL.md
-│   ├── novel-draft/SKILL.md
-│   ├── novel-review/SKILL.md
-│   └── novel-kg/SKILL.md
+│   ├── znovel-director/SKILL.md
+│   ├── znovel-outline/SKILL.md
+│   ├── znovel-world/SKILL.md
+│   ├── znovel-character/SKILL.md
+│   ├── znovel-draft/SKILL.md
+│   ├── znovel-review/SKILL.md
+│   └── znovel-kg/SKILL.md
 └── novel/                     # 写作产物
     ├── outline/               #   大纲
     ├── world/                 #   背景设定
@@ -72,7 +72,7 @@ my-novel/
 | 命令 | 用途 |
 |------|------|
 | `novelwriting init <path> <title>` | 创建新小说项目 |
-| `novelwriting install-skills` | 将 novel-* 技能符号链接到 `~/.claude/skills/` |
+| `novelwriting install-skills` | 将 znovel-* 技能符号链接到 `~/.claude/skills/` |
 | `novelwriting serve` | 启动 Web 界面 |
 | `novelwriting list` | 列出所有已注册项目 |
 | `novelwriting status [path]` | 查看项目阶段进度 |
@@ -89,7 +89,7 @@ novelwriting serve
 功能页面：
 
 - **仪表盘**：项目进度概览、工作队列
-- **命令中心**：一键复制 `/novel-*` 命令到 Claude Code 终端执行
+- **命令中心**：一键复制 `/znovel-*` 命令到 Claude Code 终端执行
 - **大纲 / 人物 / 世界观 / 正文 / 审阅**：查看各阶段产物
 
 页面左上角下拉框可切换已注册的项目。
@@ -102,14 +102,14 @@ novelwriting serve
 
 | 命令 | Agent | 流程 |
 |------|-------|------|
-| `/novel-outline generate` | 大纲构思 | 脑暴问答确定方向 → agent 生成文件 |
-| `/novel-world generate` | 背景设定 | 脑暴问答确定方向 → agent 生成文件 |
-| `/novel-character generate` | 人物设定 | agent 生成初版 → 脑暴对话修正迭代 |
-| `/novel-draft write <N>` | 正文编写 | 按大纲和三层上下文写第 N 章 |
-| `/novel-review check <N>` | 审阅校对 | 多维度检查第 N 章质量 |
+| `/znovel-outline generate` | 大纲构思 | 脑暴问答确定方向 → agent 生成文件 |
+| `/znovel-world generate` | 背景设定 | 脑暴问答确定方向 → agent 生成文件 |
+| `/znovel-character generate` | 人物设定 | agent 生成初版 → 脑暴对话修正迭代 |
+| `/znovel-draft write <N>` | 正文编写 | 按大纲和三层上下文写第 N 章 |
+| `/znovel-review check <N>` | 审阅校对 | 多维度检查第 N 章质量 |
 | `/novel status` | 主编协调 | 查看项目整体状态（含脑暴进度） |
 | `/novel work-queue` | 主编协调 | 查看审阅发现的待处理问题 |
-| `/novel-kg query "..."` | 知识管理 | 自然语言查询知识图谱 |
+| `/znovel-kg query "..."` | 知识管理 | 自然语言查询知识图谱 |
 
 ### 工作流顺序
 
@@ -157,20 +157,20 @@ checkpoints:
 
 ## 技能开发
 
-技能文件位于 `.claude/skills/novel-*/SKILL.md`，与项目代码一同版本控制。修改后：
+技能文件位于 `.claude/skills/znovel-*/SKILL.md`，与项目代码一同版本控制。修改后：
 
 - 项目内的技能：`novelwriting init` 的项目会使用复制的版本
 - 全局安装的技能：通过 `install-skills` 创建的符号链接自动指向仓库，无需重新安装
 
 ```
 .claude/skills/
-├── novel-director/SKILL.md    # 主编协调
-├── novel-outline/SKILL.md     # 大纲构思
-├── novel-world/SKILL.md       # 背景设定
-├── novel-character/SKILL.md   # 人物设定
-├── novel-draft/SKILL.md       # 正文编写
-├── novel-review/SKILL.md      # 审阅校对
-└── novel-kg/SKILL.md          # 知识图谱管理
+├── znovel-director/SKILL.md    # 主编协调
+├── znovel-outline/SKILL.md     # 大纲构思
+├── znovel-world/SKILL.md       # 背景设定
+├── znovel-character/SKILL.md   # 人物设定
+├── znovel-draft/SKILL.md       # 正文编写
+├── znovel-review/SKILL.md      # 审阅校对
+└── znovel-kg/SKILL.md          # 知识图谱管理
 ```
 
 ## 全局项目注册表

@@ -274,42 +274,42 @@ const COMMAND_DEFS = [
         stage: 'outline',
         label: '大纲构思',
         commands: [
-            { id: 'outline-generate', label: '生成大纲', text: '/novel-outline generate', hint: '基于模板和用户创意生成完整大纲', args: [] },
-            { id: 'outline-revise', label: '修订大纲', text: '/novel-outline revise', hint: '修改指定的大纲文件', args: [{ name: 'file', placeholder: '文件名', default: 'story_structure.yml' }] },
+            { id: 'outline-generate', label: '生成大纲', text: '/znovel-outline generate', hint: '基于模板和用户创意生成完整大纲', args: [] },
+            { id: 'outline-revise', label: '修订大纲', text: '/znovel-outline revise', hint: '修改指定的大纲文件', args: [{ name: 'file', placeholder: '文件名', default: 'story_structure.yml' }] },
         ],
     },
     {
         stage: 'world',
         label: '背景设定',
         commands: [
-            { id: 'world-generate-light', label: '生成背景 (轻量)', text: '/novel-world generate --depth light', hint: '仅世界观总览 + 力量体系', args: [] },
-            { id: 'world-generate-deep', label: '生成背景 (深度)', text: '/novel-world generate --depth deep', hint: '完整世界观含地理、历史、势力', args: [] },
-            { id: 'world-revise', label: '修订背景', text: '/novel-world revise', hint: '修改指定世界观条目', args: [{ name: '条目名', placeholder: '条目名', default: 'overview' }] },
+            { id: 'world-generate-light', label: '生成背景 (轻量)', text: '/znovel-world generate --depth light', hint: '仅世界观总览 + 力量体系', args: [] },
+            { id: 'world-generate-deep', label: '生成背景 (深度)', text: '/znovel-world generate --depth deep', hint: '完整世界观含地理、历史、势力', args: [] },
+            { id: 'world-revise', label: '修订背景', text: '/znovel-world revise', hint: '修改指定世界观条目', args: [{ name: '条目名', placeholder: '条目名', default: 'overview' }] },
         ],
     },
     {
         stage: 'character',
         label: '人物设定',
         commands: [
-            { id: 'character-generate-light', label: '生成人物 (轻量)', text: '/novel-character generate --depth light', hint: '仅主要人物卡片', args: [] },
-            { id: 'character-generate-deep', label: '生成人物 (深度)', text: '/novel-character generate --depth deep', hint: '完整档案+成长弧线+关系网', args: [] },
-            { id: 'character-revise', label: '修订人物', text: '/novel-character revise', hint: '修改指定人物设定', args: [{ name: '人物名', placeholder: '人物名', default: '' }] },
+            { id: 'character-generate-light', label: '生成人物 (轻量)', text: '/znovel-character generate --depth light', hint: '仅主要人物卡片', args: [] },
+            { id: 'character-generate-deep', label: '生成人物 (深度)', text: '/znovel-character generate --depth deep', hint: '完整档案+成长弧线+关系网', args: [] },
+            { id: 'character-revise', label: '修订人物', text: '/znovel-character revise', hint: '修改指定人物设定', args: [{ name: '人物名', placeholder: '人物名', default: '' }] },
         ],
     },
     {
         stage: 'draft',
         label: '正文编写',
         commands: [
-            { id: 'draft-write', label: '写新章节', text: '/novel-draft write', hint: '基于大纲和三层上下文写指定章节', args: [{ name: '章节号', placeholder: '章节号', default: '1' }] },
-            { id: 'draft-rewrite', label: '重写章节', text: '/novel-draft rewrite', hint: '根据原因修订指定章节', args: [{ name: '章节号', placeholder: '章节号', default: '' }, { name: 'reason', placeholder: '原因', default: '' }] },
+            { id: 'draft-write', label: '写新章节', text: '/znovel-draft write', hint: '基于大纲和三层上下文写指定章节', args: [{ name: '章节号', placeholder: '章节号', default: '1' }] },
+            { id: 'draft-rewrite', label: '重写章节', text: '/znovel-draft rewrite', hint: '根据原因修订指定章节', args: [{ name: '章节号', placeholder: '章节号', default: '' }, { name: 'reason', placeholder: '原因', default: '' }] },
         ],
     },
     {
         stage: 'review',
         label: '审阅校对',
         commands: [
-            { id: 'review-check', label: '审阅章节', text: '/novel-review check', hint: '多维度检查章节质量', args: [{ name: '章节号', placeholder: '章节号', default: '1' }] },
-            { id: 'review-report', label: '全局审阅报告', text: '/novel-review report', hint: '汇总所有已审阅章节', args: [] },
+            { id: 'review-check', label: '审阅章节', text: '/znovel-review check', hint: '多维度检查章节质量', args: [{ name: '章节号', placeholder: '章节号', default: '1' }] },
+            { id: 'review-report', label: '全局审阅报告', text: '/znovel-review report', hint: '汇总所有已审阅章节', args: [] },
         ],
     },
     {
@@ -427,7 +427,7 @@ async function renderCommands() {
     let html = `
     <div class="how-to-use">
         <h3>⚡ 如何使用命令中心</h3>
-        <p>以下每个按钮对应一条 <code>/novel-*</code> 命令。点击<strong>复制</strong>按钮，然后在 <strong>Claude Code 终端</strong>中粘贴执行。<br>
+        <p>以下每个按钮对应一条 <code>/znovel-*</code> 命令。点击<strong>复制</strong>按钮，然后在 <strong>Claude Code 终端</strong>中粘贴执行。<br>
         命令会根据当前项目状态自动填充参数（如章节号自动设为下一章）。执行完成后回到此页面刷新即可看到最新结果。</p>
     </div>`;
 

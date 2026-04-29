@@ -1,5 +1,5 @@
 ---
-name: novel-character
+name: znovel-character
 description: 小说人物设定 - 基于已有设定生成初版，接收修正意见迭代修订
 ---
 

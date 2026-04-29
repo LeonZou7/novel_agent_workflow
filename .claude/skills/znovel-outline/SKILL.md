@@ -1,5 +1,5 @@
 ---
-name: novel-outline
+name: znovel-outline
 description: 小说大纲构思 - 接收创意摘要，生成情节大纲、卷章结构、节奏规划
 ---
 
