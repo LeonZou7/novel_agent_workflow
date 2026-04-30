@@ -255,12 +255,11 @@ def api_chat():
             context = "\n".join([f"{m['role']}: {m['content']}" for m in recent_messages])
 
             # 调用Claude
-            claude_cmd = f'claude -p "用户说: {message}\n\n上下文:\n{context}" --no-input'
+            prompt = f"用户说: {message}\n\n上下文:\n{context}"
 
             try:
                 process = subprocess.Popen(
-                    claude_cmd,
-                    shell=True,
+                    ["claude", "-p", prompt, "--no-input"],
                     cwd=project_root,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
