@@ -628,7 +628,6 @@ async function sendMessage() {
         appendChatMessage('error', '发送失败: ' + error.message);
     } finally {
         // 恢复发送按钮
-        const sendBtn = document.querySelector('.chat-send-btn');
         sendBtn.disabled = false;
         sendBtn.textContent = '发送';
     }
