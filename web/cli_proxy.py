@@ -11,10 +11,7 @@ CLI代理模块 - 安全地代理本地Claude CLI调用
 import re
 import subprocess
 import shlex
-import logging
 from typing import Optional, Tuple, List, Dict, Any
-
-logger = logging.getLogger(__name__)
 
 
 class CLIProxy:
@@ -95,13 +92,12 @@ class CLIProxy:
         """
         skill = self.build_cli_command(cmd_type, args)
 
-        # 构建Claude CLI命令
-        claude_cmd = f'claude -p "{skill}" --no-input'
+        # 使用列表形式避免shell注入
+        claude_cmd = ["claude", "-p", skill, "--no-input"]
 
         try:
             result = subprocess.run(
                 claude_cmd,
-                shell=True,
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
@@ -139,12 +135,13 @@ class CLIProxy:
                 - content: str
         """
         skill = self.build_cli_command(cmd_type, args)
-        claude_cmd = f'claude -p "{skill}" --no-input'
+
+        # 使用列表形式避免shell注入
+        claude_cmd = ["claude", "-p", skill, "--no-input"]
 
         try:
             process = subprocess.Popen(
                 claude_cmd,
-                shell=True,
                 cwd=self.project_root,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
