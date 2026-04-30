@@ -765,6 +765,18 @@ header h1 {
   .stage-list {
     grid-template-columns: 1fr;
   }
+
+  /* Chat panel responsive */
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .chat-panel {
+    width: 100%;
+    min-width: 0;
+    height: 50vh;
+    position: static;
+  }
 }
 
 /* ─── Chat Layout ──────────────────────────────────────────── */
