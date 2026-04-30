@@ -272,7 +272,13 @@ def api_chat():
                     full_response += line
                     yield f"data: {json.dumps({'type': 'output', 'content': line})}\n\n"
 
-                process.wait()
+                try:
+                    process.wait(timeout=300)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    yield f"data: {json.dumps({'type': 'error', 'content': '命令执行超时'})}\n\n"
+                    yield f"data: {json.dumps({'type': 'done', 'content': ''})}\n\n"
+                    return
 
                 # 保存助手回复
                 history.add_message("assistant", full_response)
@@ -280,11 +286,12 @@ def api_chat():
                 if process.returncode != 0:
                     stderr = process.stderr.read()
                     yield f"data: {json.dumps({'type': 'error', 'content': stderr})}\n\n"
-                else:
-                    yield f"data: {json.dumps({'type': 'done', 'content': ''})}\n\n"
 
             except Exception as e:
                 yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
+
+            # 始终发送 done 事件
+            yield f"data: {json.dumps({'type': 'done', 'content': ''})}\n\n"
 
     return Response(
         stream_with_context(generate()),
