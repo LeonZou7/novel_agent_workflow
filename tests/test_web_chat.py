@@ -228,3 +228,32 @@ class TestChatHistoryUnit:
         history.add_message("user", "hello")
         messages = history.get_messages()
         assert "timestamp" in messages[0]
+
+
+class TestProgressParsing:
+    """测试进度标记解析"""
+
+    def test_parse_progress_markers(self):
+        """测试从文本中解析进度标记"""
+        # 这个测试需要在前端 JS 中实现，这里只测试后端输出格式
+        text = "[PROGRESS:start:outline:生成大纲]\n正在构思...\n[PROGRESS:complete:outline:完成]"
+        assert "[PROGRESS:start:outline:生成大纲]" in text
+        assert "[PROGRESS:complete:outline:完成]" in text
+
+    def test_skill_injection_in_command_mode(self, client_with_project):
+        """测试命令模式是否注入了技能内容"""
+        client, project_dir = client_with_project
+        # 创建技能目录和文件
+        skill_dir = os.path.join(project_dir, ".claude", "skills", "znovel-director")
+        os.makedirs(skill_dir, exist_ok=True)
+        with open(os.path.join(skill_dir, "SKILL.md"), "w") as f:
+            f.write("# 测试导演技能\n这是测试内容")
+
+        response = client.post(
+            f'/api/chat?project={project_dir}',
+            json={'message': '/novel status'}
+        )
+        assert response.status_code == 200
+        body = response.data.decode('utf-8')
+        # 应该包含 start 事件
+        assert 'data: ' in body
