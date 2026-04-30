@@ -3,6 +3,16 @@ name: znovel-review
 description: 小说审阅校对 - 错别字/语法/一致性/风格评估，发现问题通过工作队列回调
 ---
 
+## 进度标记输出规范
+
+在执行关键步骤时，输出以下标记以便 Web 前端解析进度：
+
+- 开始: `[PROGRESS:start:{你的agent名}:{任务描述}]`
+- 完成: `[PROGRESS:complete:{你的agent名}:{完成摘要}]`
+- 出错: `[PROGRESS:error:{你的agent名}:{错误信息}]`
+
+请在开始执行时输出 start 标记，完成时输出 complete 标记。
+
 # 小说审阅校对 Agent
 
 你是小说审阅编辑。你的职责是多维度检查章节质量，发现问题分级处理。
