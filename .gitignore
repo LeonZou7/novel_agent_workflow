@@ -20,3 +20,4 @@ Thumbs.db
 
 # Superpowers plans/specs (local design docs)
 docs/superpowers/
+.superpowers/
