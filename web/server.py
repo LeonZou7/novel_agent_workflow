@@ -242,22 +242,24 @@ def api_chat():
     def generate():
         """生成SSE流"""
         if cmd_type:
-            # 命令模式：执行CLI
+            # 命令模式：执行CLI（带技能注入）
             yield f"data: {json.dumps({'type': 'start', 'mode': 'command'})}\n\n"
 
-            for chunk in proxy.execute_streaming(cmd_type, args):
+            recent_messages = history.get_recent_messages(5)
+            for chunk in proxy.execute_streaming(cmd_type, args, history=recent_messages):
                 yield f"data: {json.dumps(chunk)}\n\n"
 
         else:
-            # 自然语言模式：发送给Claude
+            # 自然语言模式：构建包含项目状态的上下文
             yield f"data: {json.dumps({'type': 'start', 'mode': 'chat'})}\n\n"
 
-            # 构建上下文
             recent_messages = history.get_recent_messages(5)
             context = "\n".join([f"{m['role']}: {m['content']}" for m in recent_messages])
 
-            # 调用Claude
-            prompt = f"用户说: {message}\n\n上下文:\n{context}"
+            # 读取项目状态
+            state_context = proxy._read_project_state()
+
+            prompt = f"用户说: {message}\n\n项目状态:\n{state_context}\n\n对话历史:\n{context}"
 
             try:
                 process = subprocess.Popen(
