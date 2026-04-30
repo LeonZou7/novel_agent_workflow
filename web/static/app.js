@@ -534,6 +534,161 @@ async function loadTab(tab) {
 
 // ─── Chat Panel ───────────────────────────────────────────────────────
 
+// Command definitions for autocomplete
+const CHAT_COMMANDS = [
+    { cmd: '/znovel-outline generate', desc: '生成大纲' },
+    { cmd: '/znovel-outline revise', desc: '修订大纲' },
+    { cmd: '/znovel-world generate', desc: '生成背景设定' },
+    { cmd: '/znovel-world revise', desc: '修订背景设定' },
+    { cmd: '/znovel-character generate', desc: '生成人物设定' },
+    { cmd: '/znovel-character revise', desc: '修订人物设定' },
+    { cmd: '/znovel-draft write', desc: '写新章节' },
+    { cmd: '/znovel-draft rewrite', desc: '重写章节' },
+    { cmd: '/znovel-review check', desc: '审阅章节' },
+    { cmd: '/znovel-review report', desc: '全局审阅报告' },
+    { cmd: '/znovel-kg query', desc: '查询知识图谱' },
+    { cmd: '/novel status', desc: '查看项目状态' },
+    { cmd: '/novel continue', desc: '继续推进' },
+    { cmd: '/novel work-queue', desc: '查看工作队列' },
+];
+
+let autocompleteIndex = -1;
+
+// Typing Indicator
+function showTypingIndicator() {
+    const container = document.getElementById('chat-messages');
+    const welcome = container.querySelector('.chat-welcome');
+    if (welcome) welcome.remove();
+
+    const div = document.createElement('div');
+    div.className = 'typing-indicator';
+    div.id = 'typing-indicator';
+    div.innerHTML = `
+        <span class="typing-label">Claude 思考中</span>
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>`;
+    container.appendChild(div);
+    scrollToBottom();
+}
+
+function hideTypingIndicator() {
+    const el = document.getElementById('typing-indicator');
+    if (el) el.remove();
+}
+
+// Autocomplete
+function showAutocomplete(query) {
+    const dropdown = document.getElementById('autocomplete');
+    const filtered = CHAT_COMMANDS.filter(c =>
+        c.cmd.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+        hideAutocomplete();
+        return;
+    }
+
+    autocompleteIndex = -1;
+    dropdown.innerHTML = filtered.map((c, i) =>
+        `<div class="autocomplete-item" data-index="${i}" data-cmd="${c.cmd}">
+            <span class="autocomplete-cmd">${c.cmd}</span>
+            <span class="autocomplete-desc">${c.desc}</span>
+        </div>`
+    ).join('') + '<div class="autocomplete-hint">↑↓ 选择 · Tab/Enter 插入 · Esc 关闭</div>';
+
+    dropdown.style.display = 'block';
+
+    // Click to select
+    dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+            insertCommand(item.dataset.cmd);
+        });
+    });
+}
+
+function hideAutocomplete() {
+    const dropdown = document.getElementById('autocomplete');
+    dropdown.style.display = 'none';
+    autocompleteIndex = -1;
+}
+
+function insertCommand(cmd) {
+    const input = document.getElementById('chat-input');
+    input.value = cmd + ' ';
+    hideAutocomplete();
+    input.focus();
+}
+
+function updateAutocompleteHighlight(items) {
+    items.forEach((item, i) => {
+        item.classList.toggle('active', i === autocompleteIndex);
+    });
+}
+
+// ─── Progress Marker Parsing ───────────────────────────────────────
+
+const PROGRESS_REGEX = /\[PROGRESS:(start|step|complete|error):([^\]]*)\]/g;
+
+function parseProgressMarkers(text) {
+    const markers = [];
+    let cleanText = text;
+    let match;
+    PROGRESS_REGEX.lastIndex = 0;
+
+    while ((match = PROGRESS_REGEX.exec(text)) !== null) {
+        const type = match[1];
+        const params = match[2].split(':');
+        markers.push({ type, params });
+        cleanText = cleanText.replace(match[0], '');
+    }
+
+    return { markers, cleanText };
+}
+
+function createProgressHTML(markers) {
+    if (markers.length === 0) return '';
+
+    let html = '<div class="progress-container">';
+
+    for (const marker of markers) {
+        switch (marker.type) {
+            case 'start':
+                html += `<div class="progress-item progress-start">
+                    <span class="progress-agent">${marker.params[0]}</span>
+                    <span class="progress-task">${marker.params[1] || ''}</span>
+                    <span class="progress-status">执行中...</span>
+                </div>`;
+                break;
+            case 'step':
+                html += `<div class="progress-item progress-step">
+                    <span class="progress-step-num">${marker.params[0]}</span>
+                    <span class="progress-desc">${marker.params[1] || ''}</span>
+                </div>`;
+                break;
+            case 'complete':
+                html += `<div class="progress-item progress-complete">
+                    <span class="progress-agent">${marker.params[0]}</span>
+                    <span class="progress-task">${marker.params[1] || ''}</span>
+                    <span class="progress-status">✓ 完成</span>
+                </div>`;
+                break;
+            case 'error':
+                html += `<div class="progress-item progress-error">
+                    <span class="progress-agent">${marker.params[0]}</span>
+                    <span class="progress-task">${marker.params[1] || ''}</span>
+                    <span class="progress-status">✗ 错误</span>
+                </div>`;
+                break;
+        }
+    }
+
+    html += '</div>';
+    return html;
+}
+
 function clearChat() {
     const container = document.getElementById('chat-messages');
     container.innerHTML = `
@@ -546,7 +701,7 @@ function clearChat() {
     fetch(`${API}/history`, { method: 'DELETE' }).catch(console.error);
 }
 
-function appendChatMessage(role, text) {
+function appendChatMessage(role, text, loading = false) {
     const container = document.getElementById('chat-messages');
     // Remove welcome message on first real message
     const welcome = container.querySelector('.chat-welcome');
@@ -554,9 +709,11 @@ function appendChatMessage(role, text) {
 
     const div = document.createElement('div');
     div.className = `chat-message ${role}`;
+
+    const loadingHtml = `<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
     div.innerHTML = `
         <div class="msg-role">${role === 'user' ? '你' : role === 'assistant' ? 'Claude' : '错误'}</div>
-        <div class="msg-content">${escapeHtml(text)}</div>
+        <div class="msg-content">${loading ? loadingHtml : escapeHtml(text)}</div>
     `;
 
     container.appendChild(div);
@@ -576,9 +733,13 @@ async function sendMessage() {
     if (!message) return;
 
     input.value = '';
+    hideAutocomplete();
 
     // 显示用户消息
     appendChatMessage('user', message);
+
+    // 显示思考动画
+    showTypingIndicator();
 
     // 禁用发送按钮
     const sendBtn = document.querySelector('.chat-send-btn');
@@ -614,10 +775,11 @@ async function sendMessage() {
                 if (line.startsWith('data: ')) {
                     try {
                         const data = JSON.parse(line.slice(6));
-                        handleSSEEvent(data, currentMessage);
                         if (data.type === 'start') {
-                            currentMessage = appendChatMessage('assistant', '');
+                            hideTypingIndicator();
+                            currentMessage = appendChatMessage('assistant', '', true);
                         }
+                        handleSSEEvent(data, currentMessage);
                     } catch (e) {
                         console.error('SSE解析错误:', e);
                     }
@@ -625,6 +787,7 @@ async function sendMessage() {
             }
         }
     } catch (error) {
+        hideTypingIndicator();
         appendChatMessage('error', '发送失败: ' + error.message);
     } finally {
         // 恢复发送按钮
@@ -638,7 +801,31 @@ function handleSSEEvent(data, currentMessage) {
         case 'output':
             if (currentMessage) {
                 const content = currentMessage.querySelector('.msg-content');
-                if (content) content.textContent += data.content;
+                if (content) {
+                    // Clear loading dots on first output
+                    const dots = content.querySelector('.typing-dots');
+                    if (dots) content.innerHTML = '';
+
+                    // 解析进度标记
+                    const { markers, cleanText } = parseProgressMarkers(data.content);
+
+                    if (markers.length > 0) {
+                        // 更新或创建进度容器
+                        let progressContainer = content.querySelector('.progress-container');
+                        if (!progressContainer) {
+                            progressContainer = document.createElement('div');
+                            progressContainer.className = 'progress-container';
+                            content.appendChild(progressContainer);
+                        }
+                        progressContainer.innerHTML = createProgressHTML(markers).replace(/<\/?div class="progress-container">/g, '');
+                    }
+
+                    // 添加文本内容（去掉标记）
+                    if (cleanText.trim()) {
+                        const textNode = document.createTextNode(cleanText);
+                        content.appendChild(textNode);
+                    }
+                }
                 scrollToBottom();
             }
             break;
@@ -663,9 +850,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatInput = document.getElementById('chat-input');
     if (chatInput) {
         chatInput.addEventListener('keydown', (e) => {
+            const dropdown = document.getElementById('autocomplete');
+            const isOpen = dropdown.style.display === 'block';
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+
+            if (isOpen && items.length > 0) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    autocompleteIndex = Math.min(autocompleteIndex + 1, items.length - 1);
+                    updateAutocompleteHighlight(items);
+                    return;
+                }
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    autocompleteIndex = Math.max(autocompleteIndex - 1, 0);
+                    updateAutocompleteHighlight(items);
+                    return;
+                }
+                if (e.key === 'Tab' || (e.key === 'Enter' && autocompleteIndex >= 0)) {
+                    e.preventDefault();
+                    const active = items[autocompleteIndex >= 0 ? autocompleteIndex : 0];
+                    if (active) insertCommand(active.dataset.cmd);
+                    return;
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideAutocomplete();
+                    return;
+                }
+            }
+
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+            }
+        });
+
+        chatInput.addEventListener('input', () => {
+            const val = chatInput.value;
+            if (val.startsWith('/')) {
+                showAutocomplete(val);
+            } else {
+                hideAutocomplete();
             }
         });
     }
