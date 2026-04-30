@@ -26,8 +26,28 @@
                 <button class="nav-btn" data-tab="review">审阅</button>
             </nav>
         </header>
-        <main id="content">
-        </main>
+        <div class="main-layout">
+            <aside class="chat-panel">
+                <div class="chat-header">
+                    <h2>💬 对话</h2>
+                    <button class="chat-clear-btn" onclick="clearChat()">清空</button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-welcome">
+                        <p>欢迎使用 Novel Writer</p>
+                        <p class="chat-hint">输入命令或自然语言与Claude对话</p>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <textarea id="chat-input" placeholder="输入消息或命令..." rows="2"></textarea>
+                    <button class="chat-send-btn" onclick="sendMessage()">发送</button>
+                </div>
+            </aside>
+            <div class="content-area">
+                <main id="content">
+                </main>
+            </div>
+        </div>
     </div>
     <script src="/static/app.js"></script>
 

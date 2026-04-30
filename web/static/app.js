@@ -532,10 +532,72 @@ async function loadTab(tab) {
     }
 }
 
+// ─── Chat Panel ───────────────────────────────────────────────────────
+
+function clearChat() {
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = `
+        <div class="chat-welcome">
+            <p>欢迎使用 Novel Writer</p>
+            <p class="chat-hint">输入命令或自然语言与Claude对话</p>
+        </div>`;
+}
+
+function appendChatMessage(role, text) {
+    const container = document.getElementById('chat-messages');
+    // Remove welcome message on first real message
+    const welcome = container.querySelector('.chat-welcome');
+    if (welcome) welcome.remove();
+
+    const div = document.createElement('div');
+    div.className = `chat-msg chat-msg-${role}`;
+    div.textContent = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+
+    appendChatMessage('user', text);
+
+    try {
+        const resp = await fetch(`${API}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, project: currentProject }),
+        });
+        const data = await resp.json();
+        if (data.error) {
+            appendChatMessage('error', data.error);
+        } else if (data.reply) {
+            appendChatMessage('assistant', data.reply);
+        }
+    } catch (e) {
+        appendChatMessage('error', '网络错误: ' + e.message);
+    }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => loadTab(btn.dataset.tab));
     });
+
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
     await loadProjects();
     loadTab('dashboard');
 });
