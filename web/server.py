@@ -8,8 +8,10 @@ import subprocess
 import yaml
 from flask import Flask, jsonify, send_from_directory, request, Response, stream_with_context
 
-SCRIPT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts")
-sys.path.insert(0, SCRIPT_DIR)
+# Add project root and scripts to path
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
 
 from kg import KnowledgeGraph
 from state import StateManager
@@ -259,7 +261,7 @@ def api_chat():
 
             try:
                 process = subprocess.Popen(
-                    ["claude", "-p", prompt, "--no-input"],
+                    ["claude", "-p", prompt],
                     cwd=project_root,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,

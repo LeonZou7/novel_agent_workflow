@@ -93,7 +93,7 @@ class CLIProxy:
         skill = self.build_cli_command(cmd_type, args)
 
         # 使用列表形式避免shell注入
-        claude_cmd = ["claude", "-p", skill, "--no-input"]
+        claude_cmd = ["claude", "-p", skill]
 
         try:
             result = subprocess.run(
@@ -137,7 +137,7 @@ class CLIProxy:
         skill = self.build_cli_command(cmd_type, args)
 
         # 使用列表形式避免shell注入
-        claude_cmd = ["claude", "-p", skill, "--no-input"]
+        claude_cmd = ["claude", "-p", skill]
 
         try:
             process = subprocess.Popen(
