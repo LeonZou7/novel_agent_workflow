@@ -3,8 +3,10 @@
 
 import os
 import sys
+import json
+import subprocess
 import yaml
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, send_from_directory, request, Response, stream_with_context
 
 SCRIPT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts")
 sys.path.insert(0, SCRIPT_DIR)
@@ -14,6 +16,8 @@ from state import StateManager
 from work_queue import WorkQueue
 from projects import ProjectRegistry
 from init_project import init_project
+from web.cli_proxy import CLIProxy
+from web.chat_history import ChatHistory
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
@@ -210,6 +214,116 @@ def api_reviews():
                 with open(fpath, "r", encoding="utf-8") as fh:
                     files[f] = fh.read()
     return jsonify({"files": files})
+
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """处理聊天消息，返回SSE流"""
+    data = request.get_json()
+    if not data or "message" not in data:
+        return jsonify({"error": "message is required"}), 400
+
+    message = data["message"].strip()
+    project_root = get_project_root()
+
+    if not project_root:
+        return jsonify({"error": "No novel project found"}), 404
+
+    # 保存用户消息到历史
+    history = ChatHistory(project_root)
+    history.add_message("user", message)
+
+    # 解析命令
+    proxy = CLIProxy(project_root)
+    cmd_type, args = proxy.parse_command(message)
+
+    def generate():
+        """生成SSE流"""
+        if cmd_type:
+            # 命令模式：执行CLI
+            yield f"data: {json.dumps({'type': 'start', 'mode': 'command'})}\n\n"
+
+            for chunk in proxy.execute_streaming(cmd_type, args):
+                yield f"data: {json.dumps(chunk)}\n\n"
+
+        else:
+            # 自然语言模式：发送给Claude
+            yield f"data: {json.dumps({'type': 'start', 'mode': 'chat'})}\n\n"
+
+            # 构建上下文
+            recent_messages = history.get_recent_messages(5)
+            context = "\n".join([f"{m['role']}: {m['content']}" for m in recent_messages])
+
+            # 调用Claude
+            claude_cmd = f'claude -p "用户说: {message}\n\n上下文:\n{context}" --no-input'
+
+            try:
+                process = subprocess.Popen(
+                    claude_cmd,
+                    shell=True,
+                    cwd=project_root,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1
+                )
+
+                full_response = ""
+                for line in process.stdout:
+                    full_response += line
+                    yield f"data: {json.dumps({'type': 'output', 'content': line})}\n\n"
+
+                process.wait()
+
+                # 保存助手回复
+                history.add_message("assistant", full_response)
+
+                if process.returncode != 0:
+                    stderr = process.stderr.read()
+                    yield f"data: {json.dumps({'type': 'error', 'content': stderr})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'type': 'done', 'content': ''})}\n\n"
+
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'
+        }
+    )
+
+
+@app.route("/api/history", methods=["GET"])
+def api_history():
+    """获取对话历史"""
+    project_root = get_project_root()
+    if not project_root:
+        return jsonify({"error": "No novel project found"}), 404
+
+    history = ChatHistory(project_root)
+    limit = request.args.get("limit", 50, type=int)
+
+    return jsonify({
+        "messages": history.get_recent_messages(limit)
+    })
+
+
+@app.route("/api/history", methods=["DELETE"])
+def api_clear_history():
+    """清空对话历史"""
+    project_root = get_project_root()
+    if not project_root:
+        return jsonify({"error": "No novel project found"}), 404
+
+    history = ChatHistory(project_root)
+    history.clear()
+
+    return jsonify({"success": True})
 
 
 if __name__ == "__main__":
