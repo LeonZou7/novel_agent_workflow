@@ -541,6 +541,9 @@ function clearChat() {
             <p>欢迎使用 Novel Writer</p>
             <p class="chat-hint">输入命令或自然语言与Claude对话</p>
         </div>`;
+
+    // 清空服务器端历史
+    fetch(`${API}/history`, { method: 'DELETE' }).catch(console.error);
 }
 
 function appendChatMessage(role, text) {
@@ -550,34 +553,104 @@ function appendChatMessage(role, text) {
     if (welcome) welcome.remove();
 
     const div = document.createElement('div');
-    div.className = `chat-msg chat-msg-${role}`;
-    div.textContent = text;
+    div.className = `chat-message ${role}`;
+    div.innerHTML = `
+        <div class="msg-role">${role === 'user' ? '你' : role === 'assistant' ? 'Claude' : '错误'}</div>
+        <div class="msg-content">${escapeHtml(text)}</div>
+    `;
+
     container.appendChild(div);
+    scrollToBottom();
+
+    return div;
+}
+
+function scrollToBottom() {
+    const container = document.getElementById('chat-messages');
     container.scrollTop = container.scrollHeight;
 }
 
 async function sendMessage() {
     const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
+    const message = input.value.trim();
+    if (!message) return;
+
     input.value = '';
 
-    appendChatMessage('user', text);
+    // 显示用户消息
+    appendChatMessage('user', message);
+
+    // 禁用发送按钮
+    const sendBtn = document.querySelector('.chat-send-btn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = '发送中...';
 
     try {
-        const resp = await fetch(`${API}/chat`, {
+        const response = await fetch(`${API}/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, project: currentProject }),
+            body: JSON.stringify({ message, project: currentProject })
         });
-        const data = await resp.json();
-        if (data.error) {
-            appendChatMessage('error', data.error);
-        } else if (data.reply) {
-            appendChatMessage('assistant', data.reply);
+
+        if (!response.ok) {
+            throw new Error('请求失败');
         }
-    } catch (e) {
-        appendChatMessage('error', '网络错误: ' + e.message);
+
+        // 创建SSE读取器
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let currentMessage = null;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        handleSSEEvent(data, currentMessage);
+                        if (data.type === 'start') {
+                            currentMessage = appendChatMessage('assistant', '');
+                        }
+                    } catch (e) {
+                        console.error('SSE解析错误:', e);
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        appendChatMessage('error', '发送失败: ' + error.message);
+    } finally {
+        // 恢复发送按钮
+        const sendBtn = document.querySelector('.chat-send-btn');
+        sendBtn.disabled = false;
+        sendBtn.textContent = '发送';
+    }
+}
+
+function handleSSEEvent(data, currentMessage) {
+    switch (data.type) {
+        case 'output':
+            if (currentMessage) {
+                const content = currentMessage.querySelector('.msg-content');
+                if (content) content.textContent += data.content;
+                scrollToBottom();
+            }
+            break;
+        case 'error':
+            if (currentMessage) {
+                currentMessage.classList.remove('assistant');
+                currentMessage.classList.add('error');
+                const content = currentMessage.querySelector('.msg-content');
+                if (content) content.textContent = data.content;
+            }
+            break;
     }
 }
 
