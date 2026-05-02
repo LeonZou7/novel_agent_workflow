@@ -47,6 +47,11 @@ CONFIG_TEMPLATE = {
         "base_dir": "novel",
         "chapter_filename": "ch{num}_{title}.md",
     },
+    "style": {
+        "preset": "concise_white",
+        "reference_text": None,
+        "custom_description": None,
+    },
     "constraints": {
         "enabled": True,
         "rules": [

@@ -42,6 +42,16 @@ args:
 读取 `novel/outline/chapter_outlines/ch{N}_outline.md` 本章大纲
 读取 `.novel/config.yml` 风格配置（字数目标等）
 
+### 文风参考
+
+读取 `.novel/config.yml` 中的 `style` 段，确定写作参考：
+
+1. **预设文风**：读取 `style.preset`，加载对应的 `templates/styles/{preset}.yml` 模板，参考其句式特征、用词风格、节奏特点和示例段落
+2. **自定义参考文本**：如 `style.reference_text` 不为空，分析参考文本的句式、用词、节奏，在写作中模仿其风格
+3. **自定义描述**：如 `style.custom_description` 不为空，将其作为额外的风格约束
+
+优先级：custom_description > reference_text > preset
+
 ### 硬规则约束
 
 读取 `.novel/config.yml` 中的 `constraints` 段。如 `enabled: true`：

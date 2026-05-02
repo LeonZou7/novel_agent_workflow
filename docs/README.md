@@ -165,6 +165,34 @@ constraints:
 - **预防**：生成大纲、世界观、人物、正文时，Agent 从源头遵守约束
 - **兜底**：审阅时第 4 维度（约束合规检查）二次扫描，违规内容写入工作队列回调修改
 
+### 文风配置
+
+在 `.novel/config.yml` 中选择写作文风：
+
+```yaml
+style:
+  preset: concise_white        # 预设文风（见下方列表）
+  reference_text: null          # 自定义参考文本（可选）
+  custom_description: null      # 自定义风格描述（可选）
+```
+
+内置 6 种文风预设（`templates/styles/`）：
+
+| 预设 | 风格 | 适用场景 |
+|------|------|---------|
+| `concise_white` | 白话简洁 | 升级流、快节奏网文 |
+| `classical_elegant` | 古风文雅 | 仙侠、古言 |
+| `hot_blood` | 热血燃文 | 爽文、战斗升级 |
+| `dark_grim` | 暗黑压抑 | 暗黑奇幻、末世 |
+| `lighthearted` | 轻松幽默 | 日常向、轻喜剧 |
+| `suspenseful` | 悬疑紧张 | 推理、悬疑、惊悚 |
+
+每种预设包含句式特征、用词风格、节奏特点和示例段落，draft Agent 写正文时自动参考。
+
+也支持自定义：
+- `reference_text`：提供一段你喜欢的文本，Agent 会分析其风格并模仿
+- `custom_description`：用文字描述你想要的风格（优先级最高）
+
 ## 知识图谱
 
 所有设定存储在 `.novel/knowledge/` 中，作为各 Agent 的共享真相源。写第 N 章时，draft Agent 自动获取三层压缩上下文：
