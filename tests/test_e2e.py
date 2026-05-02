@@ -175,6 +175,55 @@ class TestE2E(unittest.TestCase):
         sm.set_stage_status("concept", "completed")
         self.assertEqual(sm.get_next_pending_stage(), "outline")
 
+    def test_05c_concept_yml_lifecycle(self):
+        """Test concept.yml brainstorm lifecycle: pending → confirmed."""
+        import yaml
+
+        concept_path = os.path.join(self.tmpdir, ".novel", "brainstorm", "concept.yml")
+
+        # Simulate director writing pending concept
+        concept = {
+            "status": "pending",
+            "config": {
+                "type": "web_novel",
+                "methodology": "web_xianxia",
+                "language": "zh-CN",
+            },
+            "concept": {
+                "theme": "复仇与成长",
+                "tone": "热血爽文，节奏明快",
+                "conflict": "废材逆袭",
+                "ending": "HE",
+                "elements": ["金手指", "升级打怪"],
+                "pitch": "一个被灭门的少年...",
+            },
+            "modifications": [],
+        }
+        with open(concept_path, "w", encoding="utf-8") as f:
+            yaml.dump(concept, f, allow_unicode=True, default_flow_style=False)
+
+        # Verify pending state
+        with open(concept_path, "r", encoding="utf-8") as f:
+            saved = yaml.safe_load(f)
+        self.assertEqual(saved["status"], "pending")
+        self.assertEqual(saved["concept"]["theme"], "复仇与成长")
+        self.assertEqual(saved["config"]["type"], "web_novel")
+
+        # Simulate user confirming
+        saved["status"] = "confirmed"
+        saved["modifications"] = [
+            {"field": "conflict", "original": "废材逆袭", "modified": "废材逆袭，打脸装逼"},
+        ]
+        with open(concept_path, "w", encoding="utf-8") as f:
+            yaml.dump(saved, f, allow_unicode=True, default_flow_style=False)
+
+        # Verify confirmed state
+        with open(concept_path, "r", encoding="utf-8") as f:
+            confirmed = yaml.safe_load(f)
+        self.assertEqual(confirmed["status"], "confirmed")
+        self.assertEqual(confirmed["concept"]["ending"], "HE")
+        self.assertEqual(len(confirmed["modifications"]), 1)
+
     def test_06_work_queue(self):
         """Test work queue operations."""
         wq = WorkQueue(self.tmpdir)
