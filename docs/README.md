@@ -176,14 +176,16 @@ style:
   custom_description: null      # 自定义风格描述（可选）
 ```
 
-内置 6 种文风预设（`templates/styles/`）：
+内置 8 种文风预设（`templates/styles/`）：
 
 | 预设 | 风格 | 适用场景 |
 |------|------|---------|
 | `concise_white` | 白话简洁 | 升级流、快节奏网文 |
-| `classical_elegant` | 古风文雅 | 仙侠、古言 |
+| `gulong` | 古龙风 | 武侠、悬疑武侠（短句定格、留白、画面分镜感） |
+| `jinyong` | 金庸风 | 武侠、历史传奇（典雅铺陈、诗词穿插、武功意象） |
 | `hot_blood` | 热血燃文 | 爽文、战斗升级 |
-| `dark_grim` | 暗黑压抑 | 暗黑奇幻、末世 |
+| `cruel_realism` | 残酷写实 | 末世、废土、生存类 |
+| `wongkarwai` | 王家卫风 | 文艺向、都市情感、意识流 |
 | `lighthearted` | 轻松幽默 | 日常向、轻喜剧 |
 | `suspenseful` | 悬疑紧张 | 推理、悬疑、惊悚 |
 
