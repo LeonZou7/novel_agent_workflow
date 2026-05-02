@@ -232,6 +232,97 @@ function escapeHtml(text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function parseOutlineData(files) {
+    const result = { arcs: [], rhythmMap: [], otherFiles: {} };
+
+    for (const [filename, content] of Object.entries(files)) {
+        if (filename === 'story_structure.yml' || filename === 'story_structure.yaml') {
+            try {
+                const data = jsyaml.load(content);
+                if (data.arcs) {
+                    result.arcs = data.arcs.map(arc => ({
+                        name: arc.name || 'Unnamed',
+                        range: arc.chapters || '',
+                        summary: arc.summary || '',
+                        beats: [],
+                        events: arc.key_events || [],
+                    }));
+                }
+            } catch (e) {
+                console.warn('Failed to parse story_structure.yml:', e);
+                result.otherFiles[filename] = content;
+            }
+        } else if (filename === 'rhythm_map.yml' || filename === 'rhythm_map.yaml') {
+            try {
+                const data = jsyaml.load(content);
+                result.rhythmMap = Array.isArray(data) ? data : [data];
+            } catch (e) {
+                console.warn('Failed to parse rhythm_map.yml:', e);
+                result.otherFiles[filename] = content;
+            }
+        } else if (filename.endsWith('.yml') || filename.endsWith('.yaml')) {
+            try {
+                const data = jsyaml.load(content);
+                // Template-style: structure.acts or structure.beats
+                if (data.structure) {
+                    if (data.structure.acts) {
+                        for (const act of data.structure.acts) {
+                            result.arcs.push({
+                                name: act.name || 'Unnamed',
+                                range: act.chapters || '',
+                                summary: '',
+                                beats: (act.beats || []).map(b => ({
+                                    name: b.name || '',
+                                    description: b.description || '',
+                                    pages: b.pages || '',
+                                })),
+                                events: [],
+                            });
+                        }
+                    } else if (data.structure.beats) {
+                        // Flat beat list (save_the_cat, three_act)
+                        result.arcs.push({
+                            name: data.label || data.name || filename,
+                            range: '',
+                            summary: data.description || '',
+                            beats: data.structure.beats.map(b => ({
+                                name: b.name || '',
+                                description: b.description || '',
+                                pages: b.pages || '',
+                            })),
+                            events: [],
+                        });
+                    }
+                } else {
+                    result.otherFiles[filename] = content;
+                }
+            } catch (e) {
+                result.otherFiles[filename] = content;
+            }
+        } else {
+            result.otherFiles[filename] = content;
+        }
+    }
+
+    return result;
+}
+
+function getRhythmForArc(rhythmMap, arcRange) {
+    if (!rhythmMap || rhythmMap.length === 0) return [];
+    if (!arcRange) return rhythmMap;
+
+    // Parse range like "1-50"
+    const match = arcRange.match(/(\d+)-(\d+)/);
+    if (!match) return rhythmMap;
+    const start = parseInt(match[1]);
+    const end = parseInt(match[2]);
+
+    return rhythmMap.filter(r => {
+        const ch = r.chapter || 0;
+        return ch >= start && ch <= end;
+    });
+}
+
 async function renderOutline() {
     const data = await fetchJSON(`${API}/outline`);
     const files = data.files || {};
