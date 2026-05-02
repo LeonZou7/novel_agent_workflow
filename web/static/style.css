@@ -344,6 +344,201 @@ nav {
   100% { transform: scale(8); opacity: 0; }
 }
 
+/* ─── Outline Split Panel ──────────────────────────────── */
+
+.outline-split {
+  display: flex;
+  gap: 0;
+  background: var(--bg-surface);
+  border: 1px solid rgba(136, 136, 170, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.outline-sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(136, 136, 170, 0.15);
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.outline-arc-item {
+  padding: 10px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+}
+
+.outline-arc-item:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.outline-arc-item.active {
+  background: var(--bg-elevated);
+  border-left: 2px solid var(--neon-cyan);
+}
+
+.outline-arc-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.outline-arc-range {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.outline-detail {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px);
+}
+
+.outline-detail-header {
+  margin-bottom: 24px;
+}
+
+.outline-detail-range {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+}
+
+.outline-detail-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.outline-detail-summary {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.outline-section {
+  margin-bottom: 24px;
+}
+
+.outline-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+/* Beats */
+.outline-beats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.outline-beat-card {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--neon-purple);
+}
+
+.outline-beat-name {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.outline-beat-pages {
+  font-size: 0.65rem;
+  color: var(--neon-yellow);
+  margin-top: 2px;
+}
+
+.outline-beat-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Key Events */
+.outline-events {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.outline-event-row {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(136, 136, 170, 0.08);
+}
+
+.outline-event-ch {
+  color: var(--neon-yellow);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  min-width: 50px;
+}
+
+.outline-event-desc {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+/* Rhythm Chart */
+.outline-rhythm {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 50px;
+}
+
+.outline-rhythm-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-width: 4px;
+  transition: height 0.3s ease;
+}
+
+.outline-rhythm-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+}
+
+/* Chapter Outline Tags */
+.outline-chapters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.outline-chapter-tag {
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  border: 1px solid rgba(136, 136, 170, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.outline-chapter-tag:hover {
+  border-color: var(--neon-purple);
+  color: var(--neon-purple);
+}
+
 .work-queue {
   margin-top: 24px;
 }
