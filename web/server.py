@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Novel Writer Web Server - Flask application."""
+"""znovel Web Server - Flask application."""
 
 import os
 import sys
@@ -363,5 +363,5 @@ def api_clear_history():
 if __name__ == "__main__":
     import sys
     port = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 8080
-    print(f"Starting Novel Writer Web Server on http://localhost:{port}")
+    print(f"Starting znovel Web Server on http://localhost:{port}")
     app.run(debug=True, port=port)

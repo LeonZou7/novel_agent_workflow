@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# novelwriting — unified CLI for the novel writing workflow tool
+# znovel — unified CLI for the novel writing workflow tool
 # Usage: add this directory to PATH, then run from anywhere:
-#   novelwriting init ./my-novel "剑破苍穹"
-#   novelwriting serve
-#   novelwriting list
-#   novelwriting status [project-path]
+#   znovel init ./my-novel "剑破苍穹"
+#   znovel serve
+#   znovel list
+#   znovel status [project-path]
 
 set -e
 TOOL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 usage() {
-    echo "Usage: novelwriting {init|serve|list|status|install-skills} [args...]"
+    echo "Usage: znovel {init|serve|list|status|install-skills} [args...]"
     echo ""
     echo "Commands:"
     echo "  init <path> <title>          Create a new novel project"
@@ -50,7 +50,7 @@ from projects import ProjectRegistry
 registry = ProjectRegistry()
 projects = registry.list_projects()
 if not projects:
-    print('No projects yet. Create one with: novelwriting init <path> <title>')
+    print('No projects yet. Create one with: znovel init <path> <title>')
 else:
     for p in projects:
         t = '短篇' if p.get('type') == 'short_story' else '网文'

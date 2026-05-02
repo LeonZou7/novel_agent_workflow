@@ -15,8 +15,8 @@ def test_parse_command():
     assert args == ["generate"]
 
     # 测试novel命令
-    cmd_type, args = proxy.parse_command("/novel status")
-    assert cmd_type == "novel"
+    cmd_type, args = proxy.parse_command("/znovel status")
+    assert cmd_type == "znovel"
     assert args == ["status"]
 
     # 测试非命令文本
@@ -34,7 +34,7 @@ def test_build_cli_command():
     assert cmd == "znovel-outline generate"
 
     # 测试 novel -> znovel-director 映射
-    cmd = proxy.build_cli_command("novel", ["status"])
+    cmd = proxy.build_cli_command("znovel", ["status"])
     assert cmd == "znovel-director status"
 
     # 测试空参数
@@ -74,7 +74,7 @@ def test_build_prompt_includes_history():
         {"role": "user", "content": "你好"},
         {"role": "assistant", "content": "你好！"},
     ]
-    prompt = proxy.build_prompt("novel", ["status"], history=history)
+    prompt = proxy.build_prompt("znovel", ["status"], history=history)
 
     assert "你好" in prompt
     assert "对话历史" in prompt

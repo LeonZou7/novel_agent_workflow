@@ -251,7 +251,7 @@ class TestProgressParsing:
 
         response = client.post(
             f'/api/chat?project={project_dir}',
-            json={'message': '/novel status'}
+            json={'message': '/znovel status'}
         )
         assert response.status_code == 200
         body = response.data.decode('utf-8')

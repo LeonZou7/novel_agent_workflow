@@ -1,4 +1,4 @@
-# Novel Writer — 小说写作工作流
+# znovel — 小说写作工作流
 
 基于 Claude Code Agent 体系的小说写作自动化工具。覆盖大纲构思、背景设定、人物设定、正文编写到审阅校对五个环节，大纲和背景设定通过脑暴问答确定方向后由 Agent 生成，人物设定先生成初版再脑暴修正，关键节点支持人工审核。
 
@@ -22,13 +22,13 @@ pip3 install pyyaml flask
 安装 Claude Code 技能（符号链接到 `~/.claude/skills/`，修改仓库中的技能后自动生效）：
 
 ```bash
-novelwriting install-skills
+znovel install-skills
 ```
 
 ### 创建第一个项目
 
 ```bash
-novelwriting init ./my-novel "剑破苍穹"
+znovel init ./my-novel "剑破苍穹"
 cd my-novel
 ```
 
@@ -71,18 +71,18 @@ my-novel/
 
 | 命令 | 用途 |
 |------|------|
-| `novelwriting init <path> <title>` | 创建新小说项目 |
-| `novelwriting install-skills` | 将 znovel-* 技能符号链接到 `~/.claude/skills/` |
-| `novelwriting serve` | 启动 Web 界面 |
-| `novelwriting list` | 列出所有已注册项目 |
-| `novelwriting status [path]` | 查看项目阶段进度 |
+| `znovel init <path> <title>` | 创建新小说项目 |
+| `znovel install-skills` | 将 znovel-* 技能符号链接到 `~/.claude/skills/` |
+| `znovel serve` | 启动 Web 界面 |
+| `znovel list` | 列出所有已注册项目 |
+| `znovel status [path]` | 查看项目阶段进度 |
 
 类型和模板在后续脑暴问答中确定，不再在 `init` 时指定。
 
 ## Web 界面
 
 ```bash
-novelwriting serve
+znovel serve
 # → 打开 http://localhost:8080
 ```
 
@@ -97,7 +97,7 @@ novelwriting serve
 
 左侧聊天面板支持直接在浏览器中与 Claude 交互：
 
-- **多 Agent 模式**：输入 `/novel continue` 等命令，导演 Agent 自动调度各阶段，包含脑暴问答、概念选择、确认等完整交互流程
+- **多 Agent 模式**：输入 `/znovel continue` 等命令，导演 Agent 自动调度各阶段，包含脑暴问答、概念选择、确认等完整交互流程
 - **命令执行**：输入 `/znovel-outline generate` 等命令直接执行，自动注入技能定义和项目状态
 - **自然语言**：用自然语言描述需求，Claude 理解并执行
 - **进度反馈**：执行过程中显示当前 Agent、任务描述和步骤进度
@@ -109,7 +109,7 @@ novelwriting serve
 
 ## Claude Code 工作流
 
-首次使用前先安装技能：`novelwriting install-skills`（或在项目目录下运行 `novelwriting init`，技能会自动复制到项目中）。
+首次使用前先安装技能：`znovel install-skills`（或在项目目录下运行 `znovel init`，技能会自动复制到项目中）。
 
 在项目目录中使用 `/` 命令驱动各阶段 Agent。
 
@@ -120,8 +120,8 @@ novelwriting serve
 | `/znovel-character generate` | 人物设定 | agent 生成初版 → 脑暴对话修正迭代 |
 | `/znovel-draft write <N>` | 正文编写 | 按大纲和三层上下文写第 N 章 |
 | `/znovel-review check <N>` | 审阅校对 | 多维度检查第 N 章质量 |
-| `/novel status` | 主编协调 | 查看项目整体状态（含脑暴进度） |
-| `/novel work-queue` | 主编协调 | 查看审阅发现的待处理问题 |
+| `/znovel status` | 主编协调 | 查看项目整体状态（含脑暴进度） |
+| `/znovel work-queue` | 主编协调 | 查看审阅发现的待处理问题 |
 | `/znovel-kg query "..."` | 知识管理 | 自然语言查询知识图谱 |
 
 ### 工作流顺序
@@ -172,7 +172,7 @@ checkpoints:
 
 技能文件位于 `.claude/skills/znovel-*/SKILL.md`，与项目代码一同版本控制。修改后：
 
-- 项目内的技能：`novelwriting init` 的项目会使用复制的版本
+- 项目内的技能：`znovel init` 的项目会使用复制的版本
 - 全局安装的技能：通过 `install-skills` 创建的符号链接自动指向仓库，无需重新安装
 
 ```

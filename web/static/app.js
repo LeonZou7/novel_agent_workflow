@@ -178,14 +178,14 @@ function createRipple(event) {
 function renderDashboard(data) {
     if (data.error) {
         return `<div class="panel">
-            <h2>欢迎使用 Novel Writer</h2>
+            <h2>欢迎使用 znovel</h2>
             <div class="how-to-use">
                 <h3>开始使用</h3>
                 <p>还没有小说项目。你可以：</p>
                 <p style="margin-top:12px;">
                     <button class="create-project-btn" onclick="showCreateModal()">+ 新建项目</button>
                 </p>
-                <p style="margin-top:12px;color:#666;">或在终端运行：<code>novelwriting init ./我的小说 "小说标题"</code></p>
+                <p style="margin-top:12px;color:#666;">或在终端运行：<code>znovel init ./我的小说 "小说标题"</code></p>
             </div>
         </div>`;
     }
@@ -566,9 +566,9 @@ const COMMAND_DEFS = [
         stage: 'director',
         label: '主编指令',
         commands: [
-            { id: 'director-status', label: '查看状态', text: '/novel status', hint: '查看项目整体进度和工作队列', args: [] },
-            { id: 'director-continue', label: '继续推进', text: '/novel continue', hint: '从当前阶段自动继续', args: [] },
-            { id: 'director-workqueue', label: '查看工作队列', text: '/novel work-queue', hint: '查看审阅发现的待处理问题', args: [] },
+            { id: 'director-status', label: '查看状态', text: '/znovel status', hint: '查看项目整体进度和工作队列', args: [] },
+            { id: 'director-continue', label: '继续推进', text: '/znovel continue', hint: '从当前阶段自动继续', args: [] },
+            { id: 'director-workqueue', label: '查看工作队列', text: '/znovel work-queue', hint: '查看审阅发现的待处理问题', args: [] },
         ],
     },
 ];
@@ -726,12 +726,12 @@ const renderers = {
             await loadProjects();
         }
         if (!currentProject) {
-            document.getElementById('project-title').textContent = '📖 Novel Writer';
+            document.getElementById('project-title').textContent = '📖 znovel';
             return renderDashboard({ error: 'no-project' });
         }
         const data = await fetchJSON(`${API}/status`);
         if (data.error) return '<div class="error">未找到小说项目。请在项目目录下运行。</div>';
-        document.getElementById('project-title').textContent = `📖 ${data.project?.title || 'Novel Writer'}`;
+        document.getElementById('project-title').textContent = `📖 ${data.project?.title || 'znovel'}`;
         return renderDashboard(data);
     },
     commands: async () => {
@@ -740,7 +740,7 @@ const renderers = {
         }
         const data = await fetchJSON(`${API}/status`);
         if (data.error) return '<div class="error">项目无效。请检查项目路径。</div>';
-        document.getElementById('project-title').textContent = `📖 ${data.project?.title || 'Novel Writer'}`;
+        document.getElementById('project-title').textContent = `📖 ${data.project?.title || 'znovel'}`;
         return await renderCommands();
     },
     chapters: async () => {
@@ -797,9 +797,9 @@ const CHAT_COMMANDS = [
     { cmd: '/znovel-review check', desc: '审阅章节' },
     { cmd: '/znovel-review report', desc: '全局审阅报告' },
     { cmd: '/znovel-kg query', desc: '查询知识图谱' },
-    { cmd: '/novel status', desc: '查看项目状态' },
-    { cmd: '/novel continue', desc: '继续推进' },
-    { cmd: '/novel work-queue', desc: '查看工作队列' },
+    { cmd: '/znovel status', desc: '查看项目状态' },
+    { cmd: '/znovel continue', desc: '继续推进' },
+    { cmd: '/znovel work-queue', desc: '查看工作队列' },
 ];
 
 let autocompleteIndex = -1;
@@ -943,7 +943,7 @@ function clearChat() {
     const container = document.getElementById('chat-messages');
     container.innerHTML = `
         <div class="chat-welcome">
-            <p>欢迎使用 Novel Writer</p>
+            <p>欢迎使用 znovel</p>
             <p class="chat-hint">输入命令或自然语言与Claude对话</p>
         </div>`;
 
