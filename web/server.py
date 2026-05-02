@@ -182,13 +182,22 @@ def api_outline():
 
     outline_dir = os.path.join(project_root, "novel", "outline")
     files = {}
+    chapter_outlines = []
     if os.path.isdir(outline_dir):
         for f in os.listdir(outline_dir):
             fpath = os.path.join(outline_dir, f)
             if f.endswith(".md") or f.endswith(".yml"):
                 with open(fpath, "r", encoding="utf-8") as fh:
                     files[f] = fh.read()
-    return jsonify({"files": files})
+
+        # Scan chapter_outlines subdirectory
+        chapters_dir = os.path.join(outline_dir, "chapter_outlines")
+        if os.path.isdir(chapters_dir):
+            for f in sorted(os.listdir(chapters_dir)):
+                if f.endswith(".md"):
+                    chapter_outlines.append(f)
+
+    return jsonify({"files": files, "chapter_outlines": chapter_outlines})
 
 
 @app.route("/api/work-queue")
