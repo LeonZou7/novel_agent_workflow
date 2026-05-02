@@ -367,6 +367,107 @@ async function renderOutline() {
     return html;
 }
 
+function renderArcDetail(arc, rhythmMap, chapterFiles) {
+    if (!arc) return '<p class="loading">选择一个卷弧查看详情</p>';
+
+    let html = '';
+    html += `<div class="outline-detail-header">`;
+    if (arc.range) html += `<div class="outline-detail-range">Ch.${escapeHtml(arc.range)}</div>`;
+    html += `<div class="outline-detail-name">${escapeHtml(arc.name)}</div>`;
+    if (arc.summary) html += `<div class="outline-detail-summary">${escapeHtml(arc.summary)}</div>`;
+    html += '</div>';
+
+    // Beats section
+    if (arc.beats && arc.beats.length > 0) {
+        html += '<div class="outline-section">';
+        html += '<div class="outline-section-title">节拍 Beats</div>';
+        html += '<div class="outline-beats">';
+        for (let i = 0; i < arc.beats.length; i++) {
+            const beat = arc.beats[i];
+            html += `<div class="outline-beat-card">
+                <div class="outline-beat-name">${escapeHtml(beat.name)}</div>
+                ${beat.pages ? `<div class="outline-beat-pages">p.${escapeHtml(String(beat.pages))}</div>` : ''}
+                ${beat.description ? `<div class="outline-beat-desc">${escapeHtml(beat.description)}</div>` : ''}
+            </div>`;
+        }
+        html += '</div></div>';
+    }
+
+    // Key Events section
+    if (arc.events && arc.events.length > 0) {
+        html += '<div class="outline-section">';
+        html += '<div class="outline-section-title">关键事件 Key Events</div>';
+        html += '<div class="outline-events">';
+        for (const evt of arc.events) {
+            html += `<div class="outline-event-row">
+                <span class="outline-event-ch">Ch.${evt.chapter}</span>
+                <span class="outline-event-desc">${escapeHtml(evt.event || '')}</span>
+            </div>`;
+        }
+        html += '</div></div>';
+    }
+
+    // Rhythm section
+    const arcRhythm = getRhythmForArc(rhythmMap, arc.range);
+    if (arcRhythm.length > 0) {
+        html += '<div class="outline-section">';
+        html += '<div class="outline-section-title">节奏曲线 Rhythm</div>';
+        html += '<div class="outline-rhythm">';
+        for (const r of arcRhythm) {
+            const level = r.tension_level || 5;
+            const pct = Math.max(10, Math.min(100, level * 10));
+            const hue = 260 - (level / 10) * 60; // purple(260) → yellow(60)
+            html += `<div class="outline-rhythm-bar" style="height:${pct}%;background:linear-gradient(180deg,hsl(${hue},80%,60%),var(--bg-elevated));" title="Ch.${r.chapter} tension:${level} ${r.key_emotion || ''}"></div>`;
+        }
+        html += '</div>';
+        if (arcRhythm.length > 0) {
+            const first = arcRhythm[0].chapter || '';
+            const last = arcRhythm[arcRhythm.length - 1].chapter || '';
+            html += `<div class="outline-rhythm-axis"><span>Ch.${first}</span><span>Ch.${last}</span></div>`;
+        }
+        html += '</div>';
+    }
+
+    // Chapter Outlines section
+    if (chapterFiles && chapterFiles.length > 0) {
+        html += '<div class="outline-section">';
+        html += '<div class="outline-section-title">章节大纲 Chapter Outlines</div>';
+        html += '<div class="outline-chapters">';
+        for (const f of chapterFiles) {
+            html += `<span class="outline-chapter-tag" onclick="loadChapterOutline('${escapeHtml(f)}')">${escapeHtml(f)}</span>`;
+        }
+        html += '</div>';
+        html += '<div id="chapter-outline-content"></div>';
+        html += '</div>';
+    }
+
+    return html;
+}
+
+function selectArc(index) {
+    const parsed = window._outlineData;
+    if (!parsed || !parsed.arcs[index]) return;
+
+    // Update sidebar active state
+    document.querySelectorAll('.outline-arc-item').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+    });
+
+    // Update detail panel
+    const detail = document.getElementById('outline-detail');
+    if (detail) {
+        detail.innerHTML = renderArcDetail(parsed.arcs[index], parsed.rhythmMap, window._chapterOutlines);
+    }
+}
+
+async function loadChapterOutline(filename) {
+    const data = await fetchJSON(`${API}/outline/chapter/${encodeURIComponent(filename)}`);
+    const container = document.getElementById('chapter-outline-content');
+    if (container) {
+        container.innerHTML = `<div class="chapter-content" style="margin-top:8px;">${escapeHtml(data.content || '')}</div>`;
+    }
+}
+
 async function renderCharacters() {
     const data = await fetchJSON(`${API}/knowledge/characters`);
     const entries = data.entries || [];
