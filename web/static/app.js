@@ -326,11 +326,44 @@ function getRhythmForArc(rhythmMap, arcRange) {
 async function renderOutline() {
     const data = await fetchJSON(`${API}/outline`);
     const files = data.files || {};
-    let html = '<div class="panel"><h2>大纲</h2>';
-    for (const [name, content] of Object.entries(files)) {
-        html += `<h3>${name}</h3><pre style="white-space:pre-wrap;background:#1a1a2e;padding:12px;border-radius:6px;margin-bottom:12px;">${escapeHtml(content)}</pre>`;
+    const chapterOutlines = data.chapter_outlines || [];
+
+    if (Object.keys(files).length === 0) {
+        return '<div class="panel"><h2>大纲</h2><p class="loading">暂无大纲数据</p></div>';
+    }
+
+    const parsed = parseOutlineData(files);
+
+    // No structured data found — fallback to raw display
+    if (parsed.arcs.length === 0 && Object.keys(parsed.otherFiles).length > 0) {
+        let html = '<div class="panel"><h2>大纲</h2>';
+        for (const [name, content] of Object.entries(parsed.otherFiles)) {
+            html += `<h3>${name}</h3><pre style="white-space:pre-wrap;background:#1a1a2e;padding:12px;border-radius:6px;margin-bottom:12px;">${escapeHtml(content)}</pre>`;
+        }
+        html += '</div>';
+        return html;
+    }
+
+    let html = '<div class="outline-split">';
+    html += '<div class="outline-sidebar">';
+    for (let i = 0; i < parsed.arcs.length; i++) {
+        const arc = parsed.arcs[i];
+        const active = i === 0 ? ' active' : '';
+        html += `<div class="outline-arc-item${active}" onclick="selectArc(${i})" data-index="${i}">
+            <div class="outline-arc-name">${escapeHtml(arc.name)}</div>
+            ${arc.range ? `<div class="outline-arc-range">Ch.${escapeHtml(arc.range)}</div>` : ''}
+        </div>`;
     }
     html += '</div>';
+    html += '<div class="outline-detail" id="outline-detail">';
+    html += renderArcDetail(parsed.arcs[0], parsed.rhythmMap, chapterOutlines);
+    html += '</div>';
+    html += '</div>';
+
+    // Store parsed data for arc switching
+    window._outlineData = parsed;
+    window._chapterOutlines = chapterOutlines;
+
     return html;
 }
 
