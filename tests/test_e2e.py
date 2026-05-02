@@ -144,7 +144,10 @@ class TestE2E(unittest.TestCase):
     def test_05_state_management(self):
         """Test workflow state transitions."""
         sm = StateManager(self.tmpdir)
-        self.assertEqual(sm.get_current_stage(), "outline")
+        self.assertEqual(sm.get_current_stage(), "concept")
+
+        sm.set_stage_status("concept", "completed")
+        self.assertEqual(sm.get_next_pending_stage(), "outline")
 
         sm.set_stage_status("outline", "completed")
         self.assertEqual(sm.get_next_pending_stage(), "world")
@@ -155,6 +158,22 @@ class TestE2E(unittest.TestCase):
         sm.advance_draft_chapter(42)
         state = sm.read()
         self.assertEqual(state["stages"]["draft"]["last_chapter"], 42)
+
+    def test_05b_concept_stage(self):
+        """Test that concept stage exists and is the initial current_stage."""
+        import shutil
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(tmpdir))
+        init_project(tmpdir, "概念阶段测试")
+
+        sm = StateManager(tmpdir)
+        self.assertEqual(sm.get_current_stage(), "concept")
+
+        # concept should be first in stage order
+        self.assertEqual(sm.get_next_pending_stage(), "concept")
+
+        sm.set_stage_status("concept", "completed")
+        self.assertEqual(sm.get_next_pending_stage(), "outline")
 
     def test_06_work_queue(self):
         """Test work queue operations."""

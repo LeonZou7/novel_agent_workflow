@@ -53,8 +53,9 @@ STATE_TEMPLATE = {
     "project": "",
     "created_at": "",
     "updated_at": "",
-    "current_stage": "outline",
+    "current_stage": "concept",
     "stages": {
+        "concept": {"status": "pending", "version": 0},
         "outline": {"status": "pending", "version": 0},
         "world": {"status": "pending", "version": 0},
         "character": {"status": "pending", "version": 0},

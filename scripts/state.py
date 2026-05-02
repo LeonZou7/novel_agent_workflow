@@ -39,10 +39,10 @@ class StateManager:
         self.write(s)
 
     def get_current_stage(self) -> str:
-        return self.read().get("current_stage", "outline")
+        return self.read().get("current_stage", "concept")
 
     def get_next_pending_stage(self) -> Optional[str]:
-        stage_order = ["outline", "world", "character", "draft", "review"]
+        stage_order = ["concept", "outline", "world", "character", "draft", "review"]
         s = self.read()
         for stage in stage_order:
             if s["stages"][stage]["status"] != "completed":
