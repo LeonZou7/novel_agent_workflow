@@ -200,6 +200,21 @@ def api_outline():
     return jsonify({"files": files, "chapter_outlines": chapter_outlines})
 
 
+@app.route("/api/outline/chapter/<filename>")
+def api_outline_chapter(filename):
+    project_root = get_project_root()
+    if not project_root:
+        return jsonify({"error": "No novel project found"}), 404
+
+    fpath = os.path.join(project_root, "novel", "outline", "chapter_outlines", filename)
+    if not os.path.isfile(fpath):
+        return jsonify({"error": "File not found"}), 404
+
+    with open(fpath, "r", encoding="utf-8") as f:
+        content = f.read()
+    return jsonify({"filename": filename, "content": content})
+
+
 @app.route("/api/work-queue")
 def api_work_queue():
     project_root = get_project_root()
