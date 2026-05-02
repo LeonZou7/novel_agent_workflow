@@ -876,6 +876,10 @@ function updateAutocompleteHighlight(items) {
     items.forEach((item, i) => {
         item.classList.toggle('active', i === autocompleteIndex);
     });
+    const active = items[autocompleteIndex];
+    if (active) {
+        active.scrollIntoView({ block: 'nearest' });
+    }
 }
 
 // ─── Progress Marker Parsing ───────────────────────────────────────

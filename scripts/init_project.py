@@ -47,6 +47,17 @@ CONFIG_TEMPLATE = {
         "base_dir": "novel",
         "chapter_filename": "ch{num}_{title}.md",
     },
+    "constraints": {
+        "enabled": True,
+        "rules": [
+            "不得出现真实国家名称（如中国、美国、日本等），须使用虚构国名",
+            "不得出现真实地名（如北京、东京、纽约等），须虚构地名替代",
+            "不得出现真实宗教名称（如佛教、基督教、伊斯兰教等），须虚构信仰体系",
+            "不得映射真实政治事件、政治人物、政党或政治运动",
+            "不得出现真实历史人物姓名，可虚构化改编",
+        ],
+        "custom_rules": [],
+    },
 }
 
 STATE_TEMPLATE = {

@@ -33,9 +33,9 @@ def test_build_cli_command():
     cmd = proxy.build_cli_command("znovel-outline", ["generate"])
     assert cmd == "znovel-outline generate"
 
-    # 测试 novel -> znovel-director 映射
+    # 测试 novel -> znovel 映射
     cmd = proxy.build_cli_command("znovel", ["status"])
-    assert cmd == "znovel-director status"
+    assert cmd == "znovel status"
 
     # 测试空参数
     cmd = proxy.build_cli_command("znovel-outline", [])

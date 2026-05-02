@@ -23,7 +23,7 @@ SKILL_MAP = {
     "znovel-draft": "znovel-draft",
     "znovel-review": "znovel-review",
     "znovel-kg": "znovel-kg",
-    "znovel": "znovel-director",
+    "znovel": "znovel",
 }
 
 
@@ -81,7 +81,7 @@ class CLIProxy:
             "znovel-draft": "znovel-draft",
             "znovel-review": "znovel-review",
             "znovel-kg": "znovel-kg",
-            "znovel": "znovel-director"
+            "znovel": "znovel"
         }
 
         skill = skill_map.get(cmd_type, cmd_type)

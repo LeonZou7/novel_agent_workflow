@@ -1,6 +1,13 @@
 ---
 name: znovel-kg
 description: 知识图谱管理 - 查询、对比、影响分析
+args:
+  - name: command
+    description: 子命令 (query / compare / impact)
+    required: true
+  - name: query
+    description: 查询内容
+    required: false
 ---
 
 # 知识图谱管理 Agent

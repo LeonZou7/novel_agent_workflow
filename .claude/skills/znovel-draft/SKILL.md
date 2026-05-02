@@ -1,6 +1,13 @@
 ---
 name: znovel-draft
 description: 小说正文编写 - 按大纲+设定写章节正文，自动更新KG摘要
+args:
+  - name: command
+    description: 子命令 (write / rewrite)
+    required: true
+  - name: chapter
+    description: 章节号
+    required: true
 ---
 
 ## 进度标记输出规范
@@ -34,6 +41,13 @@ description: 小说正文编写 - 按大纲+设定写章节正文，自动更新
 ### 额外注入
 读取 `novel/outline/chapter_outlines/ch{N}_outline.md` 本章大纲
 读取 `.novel/config.yml` 风格配置（字数目标等）
+
+### 硬规则约束
+
+读取 `.novel/config.yml` 中的 `constraints` 段。如 `enabled: true`：
+1. 将 `rules` + `custom_rules` 合并为约束清单
+2. 在撰写正文时严格遵守每一条约束
+3. 如发现情节或描写与约束冲突，主动调整为符合约束的虚构替代方案
 
 ## 正文写作规范
 
