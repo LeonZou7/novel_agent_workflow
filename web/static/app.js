@@ -150,6 +150,31 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+const STAGE_TAB_MAP = {
+    outline: 'outline',
+    world: 'world',
+    character: 'characters',
+    draft: 'chapters',
+    review: 'review',
+};
+
+function navigateToStage(stage, event) {
+    createRipple(event);
+    const tab = STAGE_TAB_MAP[stage] || stage;
+    setTimeout(() => loadTab(tab), 200);
+}
+
+function createRipple(event) {
+    const card = event.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.left = (event.clientX - rect.left) + 'px';
+    ripple.style.top = (event.clientY - rect.top) + 'px';
+    card.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+}
+
 function renderDashboard(data) {
     if (data.error) {
         return `<div class="panel">
@@ -171,7 +196,7 @@ function renderDashboard(data) {
     html += '<div class="panel"><h2>项目进度</h2><div class="stage-list">';
     for (const [name, info] of Object.entries(stages)) {
         const cls = info.status === 'completed' ? 'completed' : info.status === 'in_progress' ? 'in_progress' : '';
-        html += `<div class="stage-card ${cls}">
+        html += `<div class="stage-card ${cls}" onclick="navigateToStage('${name}', event)">
             <h3>${name}</h3>
             <div class="status">${statusLabels[info.status] || info.status}</div>
             <div class="version">v${info.version || 0}</div>

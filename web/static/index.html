@@ -38,9 +38,12 @@
                         <p class="chat-hint">输入命令或自然语言与Claude对话</p>
                     </div>
                 </div>
-                <div class="chat-input-area">
-                    <textarea id="chat-input" placeholder="输入消息或命令..." rows="2"></textarea>
-                    <button class="chat-send-btn" onclick="sendMessage()">发送</button>
+                <div class="chat-input-wrapper">
+                    <div id="autocomplete" class="autocomplete-dropdown" style="display:none;"></div>
+                    <div class="chat-input-area">
+                        <textarea id="chat-input" placeholder="输入消息或 / 命令..." rows="2"></textarea>
+                        <button class="chat-send-btn" onclick="sendMessage()">发送</button>
+                    </div>
                 </div>
             </aside>
             <div class="content-area">
