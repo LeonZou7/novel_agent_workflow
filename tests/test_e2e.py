@@ -224,6 +224,53 @@ class TestE2E(unittest.TestCase):
         self.assertEqual(confirmed["concept"]["ending"], "HE")
         self.assertEqual(len(confirmed["modifications"]), 1)
 
+    def test_05d_alignment_report(self):
+        """Test alignment report generation and work queue integration."""
+        import yaml
+
+        # Simulate alignment check finding conflicts
+        wq = WorkQueue(self.tmpdir)
+        tid = wq.add(
+            "alignment_conflict",
+            "alignment_check",
+            "outline",
+            "大纲提到「天剑宗」但世界观中无此势力",
+            "在世界观factions.md中补充天剑宗设定"
+        )
+        self.assertTrue(tid.startswith("WQ-"))
+
+        pending = wq.list_pending()
+        self.assertTrue(any(t["source"] == "alignment_check" for t in pending))
+
+        # Write alignment report
+        report_path = os.path.join(self.tmpdir, ".novel", "alignment_report.yml")
+        report = {
+            "checked_at": "2026-05-02T12:00:00",
+            "conflicts": [
+                {
+                    "id": "AL-001",
+                    "type": "missing_entity",
+                    "description": "大纲提到「天剑宗」但世界观中无此势力",
+                    "source_agent": "outline",
+                    "target_agent": "world",
+                    "work_queue_id": tid,
+                }
+            ],
+            "status": "pending_review",
+        }
+        with open(report_path, "w", encoding="utf-8") as f:
+            yaml.dump(report, f, allow_unicode=True, default_flow_style=False)
+
+        with open(report_path, "r", encoding="utf-8") as f:
+            saved = yaml.safe_load(f)
+        self.assertEqual(saved["status"], "pending_review")
+        self.assertEqual(len(saved["conflicts"]), 1)
+        self.assertEqual(saved["conflicts"][0]["work_queue_id"], tid)
+
+        # Resolve the work queue item to clean up for subsequent tests
+        wq.resolve(tid)
+        self.assertEqual(wq.count_pending(), 0)
+
     def test_06_work_queue(self):
         """Test work queue operations."""
         wq = WorkQueue(self.tmpdir)
