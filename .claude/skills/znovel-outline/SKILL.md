@@ -3,7 +3,7 @@ name: znovel-outline
 description: 小说大纲构思 - 接收创意摘要，生成情节大纲、卷章结构、节奏规划（支持分批生成）
 args:
   - name: command
-    description: 子命令 (generate / revise / brainstorm)
+    description: 子命令 (generate / revise / brainstorm / reset)
     required: true
 ---
 
@@ -241,3 +241,35 @@ foreshadowing_planted: []
 输入来源（主编在调度时提供）：
 1. `.novel/brainstorm/concept.yml` 路径
 2. `templates/{methodology}.yml` 模板文件路径
+
+### reset — 归档旧大纲，重新开始
+
+当用户想推倒重来时使用。将当前大纲和相关 KG 条目归档，然后清空状态以便重新 generate。
+
+#### 执行步骤
+
+1. **确定归档版本号**
+   - 读取 `.novel/state.yml` 中 `stages.outline.version` 值
+   - 归档目录名 = `outline_v{version}`（如 `outline_v1`、`outline_v2`）
+
+2. **归档大纲文件**
+   - 将 `novel/outline/` 整个目录移动到 `novel/archive/{归档目录名}/`
+   - 如果 `novel/archive/` 不存在，自动创建
+
+3. **归档 KG 情节条目**
+   - 将 `.novel/knowledge/plot/` 下所有 `.yml` 文件移动到 `novel/archive/{归档目录名}/knowledge_plot/`
+   - 将 `.novel/knowledge/foreshadowing.yml` 归档到 `novel/archive/{归档目录名}/foreshadowing.yml`
+   - 清空 `.novel/knowledge/plot/` 目录和 foreshadowing.yml 的 planted 列表
+
+4. **重置状态**
+   - 将 `.novel/state.yml` 中 `stages.outline.status` 设为 `pending`
+   - 不重置 version 计数器（保留归档版本号的记录）
+
+5. **输出确认**
+   - 输出 `[PROGRESS:complete:outline:旧大纲已归档至 novel/archive/{归档目录名}/]`
+   - 提示用户可以执行 `/znovel-outline generate` 重新生成
+
+#### 注意事项
+- 归档不可逆——归档后的文件不会自动恢复，用户需手动操作
+- 如果 `novel/outline/` 不存在或为空，提示无需归档
+- 如果已有正文中引用了旧大纲的情节节点，归档后正文与大纲会脱节——提示用户注意

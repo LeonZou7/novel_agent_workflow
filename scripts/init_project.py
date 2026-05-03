@@ -83,7 +83,7 @@ STATE_TEMPLATE = {
 
 KG_DIRS = ["characters", "world", "plot", "chapters"]
 
-OUTPUT_DIRS = ["outline", "world", "characters", "chapters", "review"]
+OUTPUT_DIRS = ["outline", "world", "characters", "chapters", "review", "archive"]
 
 NOVEL_DIR = ".novel"
 
