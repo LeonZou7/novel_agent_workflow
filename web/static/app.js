@@ -526,6 +526,7 @@ const COMMAND_DEFS = [
         commands: [
             { id: 'outline-generate', label: '生成大纲', text: '/znovel-outline generate', hint: '基于模板和用户创意生成完整大纲', args: [] },
             { id: 'outline-revise', label: '修订大纲', text: '/znovel-outline revise', hint: '修改指定的大纲文件', args: [{ name: 'file', placeholder: '文件名', default: 'story_structure.yml' }] },
+            { id: 'outline-reset', label: '归档重来', text: '/znovel-outline reset', hint: '归档当前大纲，重新生成', args: [] },
         ],
     },
     {
@@ -788,6 +789,7 @@ async function loadTab(tab) {
 const CHAT_COMMANDS = [
     { cmd: '/znovel-outline generate', desc: '生成大纲' },
     { cmd: '/znovel-outline revise', desc: '修订大纲' },
+    { cmd: '/znovel-outline reset', desc: '归档旧大纲，重新生成' },
     { cmd: '/znovel-world generate', desc: '生成背景设定' },
     { cmd: '/znovel-world revise', desc: '修订背景设定' },
     { cmd: '/znovel-character generate', desc: '生成人物设定' },
