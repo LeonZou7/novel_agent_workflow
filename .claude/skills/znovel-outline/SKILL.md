@@ -147,13 +147,59 @@ foreshadowing_planted: []
 
 ## 工作模式
 
-### generate — 从核心创意生成
+### generate — 从核心创意生成（分批执行）
 
-1. 读取 `.novel/brainstorm/concept.yml` 中的创意摘要 + config + 模板
-2. 根据模板结构节拍，生成卷弧划分和章节大纲
-3. 输出 story_structure.yml + chapter_outlines/ + rhythm_map.yml
-4. 将关键情节节点写入 `.novel/knowledge/plot/`
-5. 更新 `.novel/knowledge/foreshadowing.yml` 记录伏笔意图
+#### Phase 1: 准备
+
+1. 读取 `.novel/brainstorm/concept.yml`、`.novel/config.yml`、`templates/{methodology}.yml`
+2. 按「批次计划」章节计算批次划分
+3. 展示批次计划，等待用户确认
+
+#### Phase 2: 检测断点
+
+1. 检查 `novel/outline/chapter_outlines/` 目录是否已有文件
+2. 如果存在 `ch{N}_outline.md` 文件：
+   - 读取已有文件，标记对应批次为「已完成」
+   - 询问用户：跳过已完成批次 / 全部重新生成
+3. 如果不存在已有文件：从第 1 批开始
+
+#### Phase 3: 串行执行批次
+
+对每个未完成的批次，依次执行：
+
+**准备批次上下文：**
+
+每批需要传入子 agent 的上下文：
+
+- `concept.yml`（完整创意摘要）
+- `templates/{methodology}.yml`（模板）
+- `config.yml`（项目配置）
+- 当前批次的 arc 定义（名称、章节范围、beats）
+
+如果是第 N 批（N > 1），额外传入：
+- 前一批的 `story_structure` 中对应 arc 条目（key_events 列表）
+- 前一批的 KG 情节节点摘要（`.novel/knowledge/plot/{前arc名}.yml`）
+- 前一批最后 3 章的 outline 内容（`ch{end-2}_outline.md` ~ `ch{end}_outline.md`）
+
+**Spawn 子 agent 执行单批：**
+
+调度子 agent，传入上述上下文，指示其：
+1. 为本批次的每一章生成 `ch{N}_outline.md`（300-500 字情节梗概）
+2. 更新 `rhythm_map.yml`（追加本批次条目，不覆盖已有内容）
+3. 将本批次的关键情节节点写入 `.novel/knowledge/plot/{arc_name}.yml`
+4. 更新 `.novel/knowledge/foreshadowing.yml` 记录本批次的伏笔意图
+
+**批次完成后：**
+1. 输出 `[PROGRESS:complete:outline:批次{X}完成（ch{start}-ch{end}）]`
+2. 继续下一批
+
+#### Phase 4: 汇总
+
+所有批次完成后：
+1. 汇总生成 `story_structure.yml`（合并所有 arc 的 key_events）
+2. 确认 `rhythm_map.yml` 包含所有章节条目
+3. 输出 `[PROGRESS:complete:outline:全部大纲生成完成]`
+4. 输出完成摘要：总章节数、总批次、耗时
 
 ### revise — 修订已有大纲
 1. 读取用户指定的文件
