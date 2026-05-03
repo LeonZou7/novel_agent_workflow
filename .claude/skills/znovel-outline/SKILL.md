@@ -1,9 +1,9 @@
 ---
 name: znovel-outline
-description: 小说大纲构思 - 接收创意摘要，生成情节大纲、卷章结构、节奏规划
+description: 小说大纲构思 - 接收创意摘要，生成情节大纲、卷章结构、节奏规划（支持分批生成）
 args:
   - name: command
-    description: 子命令 (generate / revise)
+    description: 子命令 (generate / revise / brainstorm)
     required: true
 ---
 
