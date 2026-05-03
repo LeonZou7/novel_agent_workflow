@@ -64,7 +64,8 @@ my-novel/
     ├── world/                 #   背景设定
     ├── characters/            #   人物设定
     ├── chapters/              #   正文
-    └── review/                #   审阅报告
+    ├── review/                #   审阅报告
+    └── archive/               #   归档（reset 时旧大纲移入此目录）
 ```
 
 ## CLI 命令
@@ -115,7 +116,8 @@ znovel serve
 
 | 命令 | Agent | 流程 |
 |------|-------|------|
-| `/znovel-outline generate` | 大纲构思 | 脑暴问答确定方向 → agent 生成文件 |
+| `/znovel-outline generate` | 大纲构思 | 脑暴问答确定方向 → agent 生成文件（支持分批生成，自动防止超时） |
+| `/znovel-outline reset` | 大纲构思 | 归档当前大纲到 `novel/archive/`，重置状态以便重新生成 |
 | `/znovel-world generate` | 背景设定 | 脑暴问答确定方向 → agent 生成文件 |
 | `/znovel-character generate` | 人物设定 | agent 生成初版 → 脑暴对话修正迭代 |
 | `/znovel-draft write <N>` | 正文编写 | 按大纲和三层上下文写第 N 章 |
