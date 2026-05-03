@@ -49,6 +49,48 @@ args:
 2. 如果某 act 章节数 > `batch_threshold`，按 `batch_size` 拆分为多个子批次
 3. 如果总批次 <= 1（短篇或单卷小体量），跳过分批，直接一次性生成
 
+## 批次计划
+
+### 计算步骤
+
+1. 读取 `templates/{methodology}.yml` 的 `structure.acts`
+2. 遍历每个 act：
+   - 解析 `chapters` 字段（如 `"1-30"`、`"31-100"`、`"201-尾声"`）
+   - 如果是 `"N-尾声"` 格式，根据 `config.yml` 中的 `total_chapters` 或 concept.yml 中的估算值替换为具体数字
+   - 计算章节数 = end - start + 1
+   - 如果章节数 <= `batch_threshold`：该 act = 1 个批次
+   - 如果章节数 > `batch_threshold`：按 `batch_size` 拆分，生成 ceil(章节数 / batch_size) 个子批次
+3. 为每个批次生成 label：`arc_{i}_part_{j}`（i 从 1 开始，j 从 1 开始）
+
+### 展示格式
+
+向用户展示批次计划，使用以下 YAML 格式：
+
+```yaml
+batch_plan:
+  - batch: 1
+    chapters: "1-30"
+    arc: "第一卷：崛起"
+    label: "arc_1_part_1"
+    chapter_count: 30
+  - batch: 2
+    chapters: "31-50"
+    arc: "第一卷：崛起"
+    label: "arc_1_part_2"
+    chapter_count: 20
+  - batch: 3
+    chapters: "51-80"
+    arc: "第二卷：征途"
+    label: "arc_2_part_1"
+    chapter_count: 30
+```
+
+### 确认流程
+
+展示计划后，询问用户：
+- 确认 → 开始执行
+- 调整 → 用户可修改批次划分（如合并/拆分某些批次），修改后重新确认
+
 ## 输出产物
 
 生成以下文件到 `novel/outline/`：
