@@ -118,13 +118,34 @@ znovel serve
 |------|-------|------|
 | `/znovel-outline generate` | 大纲构思 | 脑暴问答确定方向 → agent 生成文件（支持分批生成，自动防止超时） |
 | `/znovel-outline reset` | 大纲构思 | 归档当前大纲到 `novel/archive/`，重置状态以便重新生成 |
-| `/znovel-world generate` | 背景设定 | 脑暴问答确定方向 → agent 生成文件 |
+| `/znovel-world generate` | 背景设定 | 脑暴问答确定方向 → agent 生成文件（支持分批生成，自动防止超时） |
 | `/znovel-character generate` | 人物设定 | agent 生成初版 → 脑暴对话修正迭代 |
 | `/znovel-draft write <N>` | 正文编写 | 按大纲和三层上下文写第 N 章 |
 | `/znovel-review check <N>` | 审阅校对 | 多维度检查第 N 章质量 |
 | `/znovel status` | 主编协调 | 查看项目整体状态（含脑暴进度） |
 | `/znovel work-queue` | 主编协调 | 查看审阅发现的待处理问题 |
 | `/znovel-kg query "..."` | 知识管理 | 自然语言查询知识图谱 |
+
+### 世界观分批生成
+
+`znovel-world generate` 支持按维度分批生成，防止因任务复杂度过高导致超时。
+
+**参数：**
+- `--depth light`：只生成 overview + power_system（2批）
+- `--depth deep`：生成全部 5 个维度（5批）
+- `--dimension <维度名>`：只生成指定维度（如 `--dimension overview`）
+- `--order <顺序>`：自定义维度生成顺序（如 `--order "power_system,overview,geography,history,factions"`）
+
+**维度列表：**
+1. `overview` — 世界观总览
+2. `power_system` — 力量体系
+3. `geography` — 地理概述
+4. `history` — 历史大事年表
+5. `factions` — 主要势力/组织
+
+**断点续传：**
+- 重新执行时自动跳过已完成维度
+- 失败维度可重试或跳过
 
 ### 工作流顺序
 
