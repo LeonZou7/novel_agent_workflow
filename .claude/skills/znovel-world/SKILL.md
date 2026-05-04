@@ -1,9 +1,9 @@
 ---
 name: znovel-world
-description: 小说背景设定 - 接收核心设定摘要，生成世界观、地理、历史、势力、力量体系
+description: 小说背景设定 - 接收核心设定摘要，生成世界观、地理、历史、势力、力量体系（支持分批生成）
 args:
   - name: command
-    description: 子命令 (generate / revise)
+    description: 子命令 (generate / revise / brainstorm)
     required: true
 ---
 
@@ -37,6 +37,82 @@ args:
 1. 将 `rules` + `custom_rules` 合并为约束清单
 2. 在构建世界观时严格遵守每一条约束
 3. 如发现构思方向与约束冲突，主动调整为符合约束的虚构替代方案
+
+## 维度定义
+
+世界观由以下 5 个维度组成：
+
+| 维度 | 文件名 | 内容 | KG 条目 |
+|------|--------|------|---------|
+| overview | overview.md | 世界观总览（500-800字） | overview.yml |
+| power_system | power_system.md | 力量体系详述 | power_system.yml |
+| geography | geography.md | 地理概述 | geography.yml |
+| history | history_timeline.yml | 历史大事年表 | history.yml |
+| factions | factions.md | 主要势力/组织 | factions.yml |
+
+## 分批生成配置
+
+当执行 `generate` 模式时，自动按维度分批执行，防止超时。
+
+- `--depth light`：只执行 overview + power_system（2批）
+- `--depth deep`：执行全部 5 个维度（5批）
+- 默认：执行全部 5 个维度
+
+默认执行顺序：overview → power_system → geography → history → factions
+
+用户可通过 `--order` 参数自定义顺序：
+```
+/znovel-world generate --order "power_system,overview,geography,history,factions"
+```
+
+用户可通过 `--dimension` 参数指定只生成特定维度：
+```
+/znovel-world generate --dimension overview
+/znovel-world generate --dimension geography,history
+```
+
+## 执行计划
+
+### 计算步骤
+
+1. 读取参数（`--depth`、`--order`、`--dimension`）
+2. 确定要执行的维度列表
+3. 检测已完成维度（检查 `.novel/knowledge/world/` 下的 KG 文件）
+4. 生成执行计划
+
+### 展示格式
+
+向用户展示执行计划，使用以下 YAML 格式：
+
+```yaml
+world_generation_plan:
+  - dimension: overview
+    status: pending  # pending | completed | skipped
+    file: novel/world/overview.md
+    kg: .novel/knowledge/world/overview.yml
+  - dimension: power_system
+    status: completed
+    file: novel/world/power_system.md
+    kg: .novel/knowledge/world/power_system.yml
+  - dimension: geography
+    status: pending
+    file: novel/world/geography.md
+    kg: .novel/knowledge/world/geography.yml
+  - dimension: history
+    status: pending
+    file: novel/world/history_timeline.yml
+    kg: .novel/knowledge/world/history.yml
+  - dimension: factions
+    status: pending
+    file: novel/world/factions.md
+    kg: .novel/knowledge/world/factions.yml
+```
+
+### 确认流程
+
+展示计划后，询问用户：
+- 确认 → 开始执行
+- 调整 → 用户可修改维度顺序或跳过某些维度
 
 ## 输出产物
 
@@ -82,14 +158,72 @@ relationships:
 
 ## 工作模式
 
-### generate — 从核心摘要生成
-1. 读取 `.novel/brainstorm/concept.yml` 中的创意蓝图 + config
-2. 根据摘要确定的方向生成各维度设定
-3. 输出 Markdown 文件到 novel/world/
-4. 将结构化摘要写入 KG
+### generate — 从核心摘要生成（分批执行）
+
+#### Phase 1: 准备
+
+1. 读取参数，确定要执行的维度列表
+2. 检测已完成维度
+3. 展示执行计划，等待用户确认
+
+#### Phase 2: 检测断点
+
+1. 检查 `.novel/knowledge/world/` 目录是否已有 KG 文件
+2. 如果存在对应维度的 KG 文件：
+   - 标记该维度为「已完成」
+   - 询问用户：跳过已完成维度 / 全部重新生成
+3. 如果不存在已有文件：从第一个维度开始
+
+#### Phase 3: 串行执行维度
+
+对每个未完成的维度，依次执行：
+
+**准备维度上下文：**
+
+每批需要读取的上下文：
+
+- `.novel/brainstorm/concept.yml`（完整创意摘要）
+- `.novel/config.yml`（项目配置 + constraints）
+- `novel/outline/story_structure.yml`（大纲，可选）
+- 已完成维度的 KG 摘要（从 `.novel/knowledge/world/` 读取）
+
+**执行维度生成：**
+
+1. 读取上述上下文
+2. 根据维度类型生成对应内容
+3. 写入 markdown 文件到 `novel/world/`
+4. 写入 KG 条目到 `.novel/knowledge/world/`
+5. 输出进度标记
+
+**维度完成后：**
+1. 输出 `[PROGRESS:complete:world:{dimension}完成]`
+2. 继续下一维度
+
+#### Phase 4: 汇总
+
+所有维度完成后：
+1. 输出 `[PROGRESS:complete:world:全部世界观生成完成]`
+2. 输出完成摘要：完成的维度列表、生成的文件列表
+
+#### 错误处理
+
+**单维度失败：**
+1. 输出 `[PROGRESS:error:world:{dimension}失败 — {错误信息}]`
+2. 记录已完成的维度编号
+3. 提示用户选项：
+   - 重试失败维度
+   - 跳过失败维度，继续后续维度
+   - 终止生成
+4. 已写入的文件（已完成维度的 markdown 和 KG 条目）保留不回滚
+
+**断点续传：**
+1. 重新执行 `generate` 时，自动检测 `.novel/knowledge/world/` 已有 KG 文件
+2. 跳过已有完整 KG 条目的维度
+3. 对部分完成的维度（如 KG 文件存在但内容不完整），重新生成
 
 ### revise — 修订已有设定
-1. 读取指定条目
+
+1. 读取用户指定的维度文件
 2. 根据用户指令修改
 3. 更新 KG 对应条目，记录版本变化
 
