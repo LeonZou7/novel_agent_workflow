@@ -232,6 +232,26 @@ function escapeHtml(text) {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function renderMarkdown(text) {
+    if (!text) return '';
+    let html = escapeHtml(text);
+    // headings
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    // bold & italic
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // unordered list
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+    // paragraphs (lines not already wrapped)
+    html = html.replace(/^(?!<[hulo]|<li)(.+)$/gm, '<p>$1</p>');
+    // clean up empty paragraphs
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    return html;
+}
+
 function parseOutlineData(files) {
     const result = { arcs: [], rhythmMap: [], otherFiles: {} };
 
@@ -471,39 +491,204 @@ async function loadChapterOutline(filename) {
 async function renderCharacters() {
     const data = await fetchJSON(`${API}/knowledge/characters`);
     const entries = data.entries || [];
-    let html = '<div class="panel"><h2>人物</h2>';
     if (entries.length === 0) {
-        html += '<p class="loading">暂无人物数据</p>';
-    } else {
-        for (const name of entries) {
-            html += `<div class="chapter-item" onclick="loadCharacter('${name}')">${name}</div>`;
-        }
+        return '<div class="panel"><h2>人物</h2><p class="loading">暂无人物数据</p></div>';
     }
-    html += '<div id="character-detail"></div></div>';
+    let html = '<div class="kg-split">';
+    html += '<div class="kg-sidebar">';
+    for (let i = 0; i < entries.length; i++) {
+        const name = entries[i];
+        const active = i === 0 ? ' active' : '';
+        html += `<div class="kg-item${active}" onclick="selectCharacter('${escapeHtml(name)}')" data-name="${escapeHtml(name)}">
+            <span class="kg-item-name">${escapeHtml(name)}</span>
+        </div>`;
+    }
+    html += '</div>';
+    html += '<div class="kg-detail" id="character-detail">';
+    html += '<div class="loading">加载中...</div>';
+    html += '</div></div>';
+    // load first character detail
+    window._charEntries = entries;
+    setTimeout(() => loadCharacter(entries[0]), 0);
     return html;
 }
 
 async function loadCharacter(name) {
     const data = await fetchJSON(`${API}/knowledge/characters/${encodeURIComponent(name)}`);
-    document.getElementById('character-detail').innerHTML =
-        `<div class="chapter-content"><pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre></div>`;
+    const refs = await fetchJSON(`${API}/knowledge/characters/${encodeURIComponent(name)}/references`);
+    const container = document.getElementById('character-detail');
+    if (!container) return;
+    container.innerHTML = renderCharacterDetail(data, refs.references || []);
+}
+
+function renderCharacterDetail(d, refs) {
+    let html = '';
+    // Header
+    html += '<div class="char-header">';
+    html += `<div class="char-name">${escapeHtml(d.name || '')}</div>`;
+    if (d.aliases && d.aliases.length) {
+        html += `<div class="char-aliases">别名: ${d.aliases.map(a => escapeHtml(a)).join('、')}</div>`;
+    }
+    html += '<div class="char-badges">';
+    if (d.role) html += `<span class="char-badge ${d.role}">${escapeHtml(d.role)}</span>`;
+    if (d.status) html += `<span class="char-badge status-${d.status}">${escapeHtml(d.status)}</span>`;
+    html += '</div></div>';
+
+    // Info grid
+    const infoFields = [];
+    if (d.current_level) infoFields.push({ label: '境界', value: d.current_level });
+    if (d.faction) infoFields.push({ label: '势力', value: d.faction });
+    if (d.gender) infoFields.push({ label: '性别', value: d.gender });
+    if (d.age) infoFields.push({ label: '年龄', value: d.age });
+    if (infoFields.length > 0) {
+        html += '<div class="char-info-grid">';
+        for (const f of infoFields) {
+            html += `<div class="char-info-item">
+                <div class="char-info-label">${escapeHtml(f.label)}</div>
+                <div class="char-info-value">${escapeHtml(String(f.value))}</div>
+            </div>`;
+        }
+        html += '</div>';
+    }
+
+    // Traits
+    if (d.key_traits && d.key_traits.length) {
+        html += '<div class="outline-section"><div class="outline-section-title">特质 Traits</div>';
+        html += '<div class="char-traits">';
+        for (const t of d.key_traits) {
+            html += `<span class="char-trait">${escapeHtml(t)}</span>`;
+        }
+        html += '</div></div>';
+    }
+
+    // Relationships
+    if (d.key_relationships && d.key_relationships.length) {
+        html += '<div class="outline-section"><div class="outline-section-title">关系 Relationships</div>';
+        html += '<div class="char-relationships">';
+        for (const r of d.key_relationships) {
+            html += `<div class="char-rel-row">
+                <span class="char-rel-name" onclick="selectCharacter('${escapeHtml(r.name)}')">${escapeHtml(r.name)}</span>
+                <span class="char-rel-type">${escapeHtml(r.relation || '')}</span>
+                <span class="char-rel-status">${escapeHtml(r.status || '')}</span>
+            </div>`;
+        }
+        html += '</div></div>';
+    }
+
+    // Growth summary
+    if (d.growth_summary) {
+        html += `<div class="char-growth">${escapeHtml(d.growth_summary)}</div>`;
+    }
+
+    // Details (markdown)
+    if (d.details) {
+        html += '<div class="outline-section"><div class="outline-section-title">详细设定 Details</div>';
+        html += `<div class="world-details">${renderMarkdown(d.details)}</div>`;
+        html += '</div>';
+    }
+
+    // References
+    if (refs.length > 0) {
+        html += '<div class="outline-section"><div class="outline-section-title">被引用 References</div>';
+        html += '<div class="char-relationships">';
+        for (const r of refs) {
+            html += `<div class="char-rel-row">
+                <span class="char-rel-name" onclick="loadTab('${r.category === 'world' ? 'world' : r.category === 'characters' ? 'characters' : 'outline'}')">${escapeHtml(r.category)}/${escapeHtml(r.name)}</span>
+            </div>`;
+        }
+        html += '</div></div>';
+    }
+
+    return html;
+}
+
+function selectCharacter(name) {
+    document.querySelectorAll('.kg-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.name === name);
+    });
+    loadCharacter(name);
 }
 
 async function renderWorld() {
     const data = await fetchJSON(`${API}/knowledge/world`);
     const entries = data.entries || [];
-    let html = '<div class="panel"><h2>世界观设定</h2>';
-    for (const name of entries) {
-        html += `<div class="chapter-item" onclick="loadWorldEntry('${name}')">${name}</div>`;
+    if (entries.length === 0) {
+        return '<div class="panel"><h2>世界观设定</h2><p class="loading">暂无世界观数据</p></div>';
     }
-    html += '<div id="world-detail"></div></div>';
+    let html = '<div class="kg-split">';
+    html += '<div class="kg-sidebar">';
+    for (let i = 0; i < entries.length; i++) {
+        const name = entries[i];
+        const active = i === 0 ? ' active' : '';
+        html += `<div class="kg-item${active}" onclick="selectWorldEntry('${escapeHtml(name)}')" data-name="${escapeHtml(name)}">
+            <span class="kg-item-name">${escapeHtml(name)}</span>
+        </div>`;
+    }
+    html += '</div>';
+    html += '<div class="kg-detail" id="world-detail">';
+    html += '<div class="loading">加载中...</div>';
+    html += '</div></div>';
+    window._worldEntries = entries;
+    setTimeout(() => loadWorldEntry(entries[0]), 0);
     return html;
 }
 
 async function loadWorldEntry(name) {
     const data = await fetchJSON(`${API}/knowledge/world/${encodeURIComponent(name)}`);
-    document.getElementById('world-detail').innerHTML =
-        `<div class="chapter-content"><pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre></div>`;
+    const refs = await fetchJSON(`${API}/knowledge/world/${encodeURIComponent(name)}/references`);
+    const container = document.getElementById('world-detail');
+    if (!container) return;
+    container.innerHTML = renderWorldDetail(data, refs.references || []);
+}
+
+function renderWorldDetail(d, refs) {
+    let html = '';
+    // Header
+    html += '<div class="world-header">';
+    html += `<div class="world-name">${escapeHtml(d.name || '')}</div>`;
+    if (d.summary) html += `<div class="world-summary">${escapeHtml(d.summary)}</div>`;
+    html += '</div>';
+
+    // Details (markdown)
+    if (d.details) {
+        html += '<div class="outline-section"><div class="outline-section-title">详细设定 Details</div>';
+        html += `<div class="world-details">${renderMarkdown(d.details)}</div>`;
+        html += '</div>';
+    }
+
+    // Relationships
+    if (d.relationships && d.relationships.length) {
+        html += '<div class="outline-section"><div class="outline-section-title">关联条目 Relationships</div>';
+        html += '<div class="world-relationships">';
+        for (const r of d.relationships) {
+            html += `<div class="world-rel-row">
+                <span class="world-rel-target" onclick="selectWorldEntry('${escapeHtml(r.target)}')">${escapeHtml(r.target)}</span>
+                <span class="world-rel-type">${escapeHtml(r.relation || '')}</span>
+            </div>`;
+        }
+        html += '</div></div>';
+    }
+
+    // References from other entries
+    if (refs.length > 0) {
+        html += '<div class="outline-section"><div class="outline-section-title">被引用 References</div>';
+        html += '<div class="world-relationships">';
+        for (const r of refs) {
+            html += `<div class="world-rel-row">
+                <span class="world-rel-target" onclick="loadTab('${r.category === 'world' ? 'world' : r.category === 'characters' ? 'characters' : 'outline'}')">${escapeHtml(r.category)}/${escapeHtml(r.name)}</span>
+            </div>`;
+        }
+        html += '</div></div>';
+    }
+
+    return html;
+}
+
+function selectWorldEntry(name) {
+    document.querySelectorAll('.kg-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.name === name);
+    });
+    loadWorldEntry(name);
 }
 
 async function renderReview() {
@@ -535,6 +720,8 @@ const COMMAND_DEFS = [
         commands: [
             { id: 'world-generate-light', label: '生成背景 (轻量)', text: '/znovel-world generate --depth light', hint: '仅世界观总览 + 力量体系', args: [] },
             { id: 'world-generate-deep', label: '生成背景 (深度)', text: '/znovel-world generate --depth deep', hint: '完整世界观含地理、历史、势力', args: [] },
+            { id: 'world-generate-dimension', label: '生成指定维度', text: '/znovel-world generate --dimension', hint: '生成指定维度（overview/power_system/geography/history/factions）', args: [{ name: 'dimensions', placeholder: '维度名', default: 'overview' }] },
+            { id: 'world-generate-order', label: '自定义顺序生成', text: '/znovel-world generate --order', hint: '自定义维度生成顺序', args: [{ name: 'order', placeholder: '顺序', default: 'overview,power_system,geography,history,factions' }] },
             { id: 'world-revise', label: '修订背景', text: '/znovel-world revise', hint: '修改指定世界观条目', args: [{ name: '条目名', placeholder: '条目名', default: 'overview' }] },
         ],
     },
